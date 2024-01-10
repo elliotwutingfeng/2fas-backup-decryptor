@@ -26,12 +26,13 @@ SERVICES_ENCRYPTED_FIELD_LENGTH = 3
 HASH = 'sha256'.freeze
 ENCRYPTION_CIPHER = 'aes-256-gcm'.freeze
 
+#
 # Parse `plain_text` string as JSON object
-
+#
 # @param [String] plain_text Encoded JSON string
-
+#
 # @return [BasicObject] JSON object
-
+#
 def parse_json(plain_text)
   JSON.parse(plain_text, symbolize_names: true)
 rescue JSON::ParserError => e
@@ -58,14 +59,14 @@ def extract_fields(content)
   { cipher_text_with_auth_tag: cipher_text_with_auth_tag, salt: salt, iv: iv }
 end
 
+#
 # Separate cipher text from 16-byte AES-GCM authentication tag
-
-# Reference: <https://crypto.stackexchange.com/a/63539>
-
+# Reference: https://crypto.stackexchange.com/a/63539
+#
 # @param [String] cipher_text_with_auth_tag Cipher text with AES-GCM authentication tag as bytes
-
+#
 # @return [Hash] Cipher text as bytes and AES-GCM authentication tag as bytes
-
+#
 def split_cipher_text(cipher_text_with_auth_tag)
   if cipher_text_with_auth_tag.length <= AUTH_TAG_LENGTH
     warn format('Invalid file. Length of cipher text with auth tag must be more than %d', AUTH_TAG_LENGTH)
@@ -76,20 +77,17 @@ def split_cipher_text(cipher_text_with_auth_tag)
     auth_tag: cipher_text_with_auth_tag[-AUTH_TAG_LENGTH..-1] }
 end
 
+#
 # Decrypt `cipher_text` and return the plaintext result as String
-
+#
 # @param [String] cipher_text Encrypted text as bytes to be decrypted
-
 # @param [String] password Backup file password in plaintext
-
 # @param [String] salt HMAC salt as bytes
-
 # @param [String] iv AES-GCM initialization vector as bytes
-
 # @param [String] auth_tag AES-GCM authentication tag as bytes
-
+#
 # @return [String] Decrypted `cipher_text`
-
+#
 def decrypt_ciphertext(cipher_text, password, salt, iv, auth_tag)
   decipher = OpenSSL::Cipher.new ENCRYPTION_CIPHER
   decipher.decrypt

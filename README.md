@@ -4,15 +4,13 @@
 <a href="https://coveralls.io/github/elliotwutingfeng/2fas-backup-decryptor?branch=main"><img src="https://img.shields.io/coverallsCoverage/github/elliotwutingfeng/2fas-backup-decryptor?logo=coveralls&style=for-the-badge" alt="Coveralls"/></a>
 [![GitHub license](https://img.shields.io/badge/LICENSE-GPLv3-GREEN?style=for-the-badge)](LICENSE)
 
-<img src='https://coveralls.io/repos/github/elliotwutingfeng/2fas-backup-decryptor/badge.svg?branch=main' alt='' width="0" height="0" />
-
 CLI tool to decrypt backup files exported from the [2FAS Authenticator app](https://2fas.com).
 
 This application is neither affiliated with Two Factor Authentication Service, Inc. nor 2FAS.
 
 ## Requirements
 
-Ruby 2 or 3. No external dependencies needed.
+Ruby >= 2.4 or >= 3. Supports Windows, macOS, and Linux. No external dependencies needed.
 
 ## Example
 
