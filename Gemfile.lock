@@ -53,7 +53,6 @@ GEM
     unicode-display_width (2.5.0)
 
 PLATFORMS
-  ruby
   x86_64-linux
 
 DEPENDENCIES
@@ -63,4 +62,4 @@ DEPENDENCIES
   simplecov-cobertura
 
 BUNDLED WITH
-   2.5.4
+   2.3.27
