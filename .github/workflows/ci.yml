@@ -22,12 +22,12 @@ jobs:
 
             - name: Run bundle install
               run: |
-                  gem install bundler -v '2.3'
-                  bundle install
+                  gem install bundler -v '~> 2.3, < 2.4.0'
+                  bundle _2.3_ install
 
             - name: Run tests
               run: |
-                  bundle exec rspec
+                  bundle _2.3_ exec rspec
 
             - name: Upload coverage to Coveralls
               if: matrix.os == 'ubuntu-latest' && matrix.ruby-version == 3.3
