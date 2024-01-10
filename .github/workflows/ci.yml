@@ -9,20 +9,7 @@ jobs:
             matrix:
                 os: [macos-latest, windows-latest, ubuntu-latest]
                 ruby-version:
-                    [
-                        "2.0",
-                        "2.1",
-                        "2.2",
-                        "2.3",
-                        "2.4",
-                        "2.5",
-                        "2.6",
-                        "2.7",
-                        "3.0",
-                        "3.1",
-                        "3.2",
-                        "3.3",
-                    ]
+                    [2.0, 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 3.0, 3.1, 3.2, 3.3]
         runs-on: ${{ matrix.os }}
 
         steps:
@@ -33,9 +20,16 @@ jobs:
               with:
                   ruby-version: ${{ matrix.ruby-version }}
 
-            - name: Run bundle install
+            - name: Run bundle install (legacy)
+              if: matrix.ruby-version != 2.0 && matrix.ruby-version != 2.1 && matrix.ruby-version != 2.2
               run: |
                   gem install bundler
+                  bundle install
+
+            - name: Run bundle install
+              if: matrix.ruby-version == 2.0 || matrix.ruby-version == 2.1 || matrix.ruby-version == 2.2
+              run: |
+                  gem install bundler -v '1.17.3'
                   bundle install
 
             - name: Run tests
@@ -43,7 +37,7 @@ jobs:
                   bundle exec rspec
 
             - name: Upload coverage to Codecov
-              if: matrix.os == 'ubuntu-latest' && matrix.ruby-version == '3.3'
+              if: matrix.os == 'ubuntu-latest' && matrix.ruby-version == 3.3
               uses: codecov/codecov-action@v3
 
     format-markdown:
