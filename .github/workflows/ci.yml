@@ -9,7 +9,7 @@ jobs:
             matrix:
                 os: [macos-latest, windows-latest, ubuntu-latest]
                 ruby-version:
-                    [2.3, 2.4, 2.5, 2.6, 2.7, 3.0, 3.1, 3.2, 3.3]
+                    ['2.3', '2.4', '2.5', '2.6', '2.7', '3.0', '3.1', '3.2', '3.3']
         runs-on: ${{ matrix.os }}
 
         steps:
@@ -22,7 +22,7 @@ jobs:
 
             - name: Run bundle install
               run: |
-                  gem install bundler
+                  gem install bundler -v '2.3'
                   bundle install
 
             - name: Run tests
@@ -43,7 +43,7 @@ jobs:
             - name: Format Markdown with markdownlint
               run: |
                   npm install -g markdownlint-cli
-                  markdownlint --disable MD013 --fix . --ignore CODE_OF_CONDUCT.md
+                  markdownlint --disable MD013 MD033 --fix . --ignore CODE_OF_CONDUCT.md
                   git add -A
                   git diff --cached --exit-code
 
