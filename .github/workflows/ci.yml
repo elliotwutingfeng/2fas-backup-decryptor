@@ -21,6 +21,11 @@ jobs:
                   ruby-version: ${{ matrix.ruby-version }}
                   bundler: 'none'
 
+            - name: Fix `required_ruby_version` bug in Ruby 2.3
+              if: matrix.ruby-version == 2.3
+              run: |
+                  gem update --system 3.2.3
+
             - name: Run bundle install
               run: |
                   gem install bundler:2.3.27
