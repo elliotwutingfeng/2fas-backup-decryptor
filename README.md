@@ -10,7 +10,8 @@ This application is neither affiliated with Two Factor Authentication Service, I
 
 ## Requirements
 
-Ruby >= 2.0 or >= 3.0. Supports Windows, macOS, and Linux. No external dependencies needed.
+- **Ruby:** >= 2.0 or >= 3.0, no external gems needed
+- **OS:** Either Windows, macOS, or Linux
 
 ## Example
 
