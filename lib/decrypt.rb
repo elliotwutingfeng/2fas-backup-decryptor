@@ -111,6 +111,7 @@ def main
   cipher_text, auth_tag = split_cipher_text(cipher_text_with_auth_tag).values_at(:cipher_text, :auth_tag)
   $stdout.print 'Enter 2FAS encrypted backup password: '
   password = $stdin.noecho(&:gets)
+  password.chomp!
   plain_text = decrypt_ciphertext(cipher_text, password, salt, iv, auth_tag)
   parse_json(plain_text)
 
