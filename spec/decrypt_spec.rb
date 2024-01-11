@@ -34,7 +34,7 @@ end
 
 describe 'parse_json' do
   it 'Parses valid JSON' do
-    expect(parse_json('{"a": [1, 2]}')).to eq({ a: [1, 2] })
+    expect(parse_json('{"a": [1, 2]}')).to eq({ :a => [1, 2] })
   end
   it 'Exit 1 if invalid JSON' do
     silence do
@@ -58,7 +58,7 @@ end
 describe 'extract_fields' do
   it 'Extracts fields if number of fields is valid' do
     extracted = extract_fields('{"servicesEncrypted": "MQ==:Mg==:Mw=="}')
-    expected = { cipher_text_with_auth_tag: '1', salt: '2', iv: '3' }
+    expected = { :cipher_text_with_auth_tag => '1', :salt => '2', :iv => '3' }
     extracted.each do |k, v|
       expect(v).to eq(expected[k])
     end
@@ -86,13 +86,13 @@ describe 'main' do
     output = nil
     expect($stdout).to receive(:puts) { |arg| output = arg }
     main
-    obj = JSON.parse(output, symbolize_names: true)
-    expected_obj = [{ name: 'example.com', secret: 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA',
-                      updatedAt: 1_704_874_073_731,
-                      otp: { label: '', account: '', digits: 6, period: 30, algorithm: 'SHA1',
-                             tokenType: 'TOTP', source: 'Manual' }, order: { position: 0 },
-                      icon: { selected: 'Label', label: { text: 'EX', backgroundColor: 'Orange' },
-                              iconCollection: { id: 'a5b3fb65-4ec5-43e6-8ec1-49e24ca9e7ad' } } }]
+    obj = JSON.parse(output, :symbolize_names => true)
+    expected_obj = [{ :name => 'example.com', :secret => 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA',
+                      :updatedAt => 1_704_874_073_731,
+                      :otp => { :label => '', :account => '', :digits => 6, :period => 30, :algorithm => 'SHA1',
+                                :tokenType => 'TOTP', :source => 'Manual' }, :order => { :position => 0 },
+                      :icon => { :selected => 'Label', :label => { :text => 'EX', :backgroundColor => 'Orange' },
+                                 :iconCollection => { :id => 'a5b3fb65-4ec5-43e6-8ec1-49e24ca9e7ad' } } }]
     expect(obj).to eq(expected_obj)
   end
   it 'Wrong password -> Decryption failure' do

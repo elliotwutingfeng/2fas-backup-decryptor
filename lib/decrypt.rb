@@ -34,7 +34,7 @@ ENCRYPTION_CIPHER = 'aes-256-gcm'.freeze
 # @return [BasicObject] JSON object
 #
 def parse_json(plain_text)
-  JSON.parse(plain_text, symbolize_names: true)
+  JSON.parse(plain_text, :symbolize_names => true)
 rescue JSON::ParserError => e
   warn e.message
   exit 1
@@ -56,7 +56,7 @@ def extract_fields(content)
     exit 1
   end
   cipher_text_with_auth_tag, salt, iv = fields.map { |field| Base64.strict_decode64 field }
-  { cipher_text_with_auth_tag: cipher_text_with_auth_tag, salt: salt, iv: iv }
+  { :cipher_text_with_auth_tag => cipher_text_with_auth_tag, :salt => salt, :iv => iv }
 end
 
 #
@@ -73,8 +73,8 @@ def split_cipher_text(cipher_text_with_auth_tag)
     exit 1
   end
 
-  { cipher_text: cipher_text_with_auth_tag[0...-AUTH_TAG_LENGTH],
-    auth_tag: cipher_text_with_auth_tag[-AUTH_TAG_LENGTH..-1] }
+  { :cipher_text => cipher_text_with_auth_tag[0...-AUTH_TAG_LENGTH],
+    :auth_tag => cipher_text_with_auth_tag[-AUTH_TAG_LENGTH..-1] }
 end
 
 #
@@ -106,7 +106,7 @@ def main
     exit 1
   end
 
-  content = File.read(ARGV[0], encoding: 'utf-8')
+  content = File.read(ARGV[0], :encoding => 'utf-8')
   cipher_text_with_auth_tag, salt, iv = extract_fields(content).values_at(:cipher_text_with_auth_tag, :salt, :iv)
   cipher_text, auth_tag = split_cipher_text(cipher_text_with_auth_tag).values_at(:cipher_text, :auth_tag)
   password = $stdin.getpass('Enter 2FAS encrypted backup password: ')
