@@ -1,7 +1,7 @@
 # 2FAS Backup Decryptor
 
 [![Ruby](https://img.shields.io/badge/Ruby-CC342D?style=for-the-badge&logo=ruby&logoColor=white)](https://ruby-lang.org)
-<a href="https://coveralls.io/github/elliotwutingfeng/2fas-backup-decryptor?branch=main"><img src="https://img.shields.io/coverallsCoverage/github/elliotwutingfeng/2fas-backup-decryptor?logo=coveralls&style=for-the-badge" alt="Coveralls"/></a>
+[![Coveralls](https://img.shields.io/coverallsCoverage/github/elliotwutingfeng/2fas-backup-decryptor?logo=coveralls&style=for-the-badge)](https://coveralls.io/github/elliotwutingfeng/2fas-backup-decryptor?branch=main)
 [![GitHub license](https://img.shields.io/badge/LICENSE-GPLv3-GREEN?style=for-the-badge)](LICENSE)
 
 CLI tool to decrypt backup files exported from the [2FAS Authenticator app](https://2fas.com).
