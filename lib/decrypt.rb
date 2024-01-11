@@ -15,6 +15,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 require 'base64'
+require 'io/console'
 require 'json'
 require 'openssl'
 
