@@ -82,7 +82,7 @@ end
 describe 'main' do
   it 'Correct password -> Decryption success' do
     ARGV.replace ['test/encrypted_test.2fas']
-    allow($stdin).to receive(:getpass) { 'example.com' } # Backup file password
+    allow($stdin).to receive(:noecho) { 'example.com' } # Backup file password
     output = nil
     expect($stdout).to receive(:puts) { |arg| output = arg }
     main
@@ -97,7 +97,7 @@ describe 'main' do
   end
   it 'Wrong password -> Decryption failure' do
     ARGV.replace ['test/encrypted_test.2fas']
-    allow($stdin).to receive(:getpass) { '' }
+    allow($stdin).to receive(:noecho) { '' }
     expect { main }.to raise_error(OpenSSL::Cipher::CipherError)
   end
   it 'Accepts exactly 1 argument' do
