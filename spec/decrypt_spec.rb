@@ -84,8 +84,8 @@ describe 'main' do
     ARGV.replace ['test/encrypted_test.2fas']
     allow($stdin).to receive(:noecho) { 'example.com' } # Backup file password
     output = nil
-    expect($stdout).to receive(:puts)
-    expect($stdout).to receive(:puts) { |arg| output = arg }
+    expect($stderr).to receive(:puts)
+    expect($stdout).to receive(:write) { |arg| output = arg }
     main
     obj = JSON.parse(output, :symbolize_names => true)
     expected_obj = [{ :name => 'example.com', :secret => 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA',

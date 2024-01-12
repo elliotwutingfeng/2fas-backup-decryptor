@@ -49,8 +49,7 @@ end
 # @return [Hash] Fields containing data needed to decrypt the cipher text
 #
 def extract_fields(content)
-  data = parse_json(content).fetch(:servicesEncrypted, '')
-  fields = data.split(':', SERVICES_ENCRYPTED_FIELD_LENGTH + 1)
+  fields = parse_json(content).fetch(:servicesEncrypted, '').split(':', SERVICES_ENCRYPTED_FIELD_LENGTH + 1)
   if fields.length != SERVICES_ENCRYPTED_FIELD_LENGTH
     warn format('Invalid file. Number of fields is not %d.', SERVICES_ENCRYPTED_FIELD_LENGTH)
     exit 1
@@ -100,6 +99,21 @@ def decrypt_ciphertext(cipher_text, password, salt, iv, auth_tag)
   decipher.update(cipher_text) + decipher.final
 end
 
+#
+# Prompt terminal user for password.
+# A drop-in replacement for $stdin.getpass for older Ruby versions.
+#
+# @param [String] prompt Message prompt to display
+#
+# @return [String] Password
+#
+def getpass(prompt)
+  $stderr.write prompt # Display prompt without adding prompt to stdout.
+  password = $stdin.noecho(&:gets).chomp
+  $stderr.puts # Display newline without adding newline to stdout.
+  password
+end
+
 def main
   if ARGV.length != 1
     warn 'Usage: decrypt.rb <filename>'
@@ -109,13 +123,12 @@ def main
   content = File.read(ARGV[0], :encoding => 'utf-8')
   cipher_text_with_auth_tag, salt, iv = extract_fields(content).values_at(:cipher_text_with_auth_tag, :salt, :iv)
   cipher_text, auth_tag = split_cipher_text(cipher_text_with_auth_tag).values_at(:cipher_text, :auth_tag)
-  $stdout.print 'Enter 2FAS encrypted backup password: '
-  password = $stdin.noecho(&:gets).chomp
-  puts
-  plain_text = decrypt_ciphertext(cipher_text, password, salt, iv, auth_tag)
-  parse_json(plain_text)
 
-  puts plain_text
+  password = getpass('Enter 2FAS encrypted backup password: ')
+  plain_text = decrypt_ciphertext(cipher_text, password, salt, iv, auth_tag)
+  parse_json(plain_text) # Ensure plain_text is valid JSON.
+
+  $stdout.write plain_text
 end
 
 main if __FILE__ == $PROGRAM_NAME
