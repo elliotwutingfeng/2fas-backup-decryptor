@@ -26,6 +26,17 @@ SERVICES_ENCRYPTED_FIELD_LENGTH = 3
 HASH = 'sha256'.freeze
 ENCRYPTION_CIPHER = 'aes-256-gcm'.freeze
 
+def terminate(message)
+  warn message
+  exit 1
+end
+
+def assert_is_hash(obj)
+  return if obj.is_a? Hash
+
+  terminate 'Invalid vault file. Top-level is not Hash.'
+end
+
 #
 # Parse `plain_text` string as JSON object
 #
@@ -36,23 +47,22 @@ ENCRYPTION_CIPHER = 'aes-256-gcm'.freeze
 def parse_json(plain_text)
   JSON.parse(plain_text, :symbolize_names => true)
 rescue JSON::ParserError => e
-  warn e.message
-  exit 1
+  terminate e.message
 end
 
 #
 # Extract the `cipher_text_with_auth_tag`, `salt`, and `iv` bytes fields
-# located at the `:servicesEncrypted` key of JSON string `content`
+# located at the `:servicesEncrypted` key of JSON Hash `obj`
 #
-# @param [String] content JSON string
+# @param [Hash] obj JSON Hash
 #
 # @return [Hash] Fields containing data needed to decrypt the cipher text
 #
-def extract_fields(content)
-  fields = parse_json(content).fetch(:servicesEncrypted, '').split(':', SERVICES_ENCRYPTED_FIELD_LENGTH + 1)
+def extract_fields(obj)
+  assert_is_hash(obj)
+  fields = obj.fetch(:servicesEncrypted, '').split(':', SERVICES_ENCRYPTED_FIELD_LENGTH + 1)
   if fields.length != SERVICES_ENCRYPTED_FIELD_LENGTH
-    warn format('Invalid file. Number of fields is not %d.', SERVICES_ENCRYPTED_FIELD_LENGTH)
-    exit 1
+    terminate format('Invalid vault file. Number of fields is not %d.', SERVICES_ENCRYPTED_FIELD_LENGTH)
   end
   cipher_text_with_auth_tag, salt, iv = fields.map { |field| Base64.strict_decode64 field }
   { :cipher_text_with_auth_tag => cipher_text_with_auth_tag, :salt => salt, :iv => iv }
@@ -68,8 +78,7 @@ end
 #
 def split_cipher_text(cipher_text_with_auth_tag)
   if cipher_text_with_auth_tag.length <= AUTH_TAG_LENGTH
-    warn format('Invalid file. Length of cipher text with auth tag must be more than %d', AUTH_TAG_LENGTH)
-    exit 1
+    terminate format('Invalid vault file. Length of cipher text with auth tag must be more than %d', AUTH_TAG_LENGTH)
   end
 
   { :cipher_text => cipher_text_with_auth_tag[0...-AUTH_TAG_LENGTH],
@@ -80,7 +89,7 @@ end
 # Decrypt `cipher_text` and return the plaintext result as String
 #
 # @param [String] cipher_text Encrypted text as bytes to be decrypted
-# @param [String] password Backup file password in plaintext
+# @param [String] password Backup file password as plaintext
 # @param [String] salt HMAC salt as bytes
 # @param [String] iv AES-GCM initialization vector as bytes
 # @param [String] auth_tag AES-GCM authentication tag as bytes
@@ -105,7 +114,7 @@ end
 #
 # @param [String] prompt Message prompt to display
 #
-# @return [String] Password
+# @return [String] Password as plaintext
 #
 def getpass(prompt)
   $stderr.write prompt # Display prompt without adding prompt to stdout.
@@ -115,13 +124,10 @@ def getpass(prompt)
 end
 
 def main
-  if ARGV.length != 1
-    warn 'Usage: decrypt.rb <filename>'
-    exit 1
-  end
+  terminate 'Usage: decrypt.rb <filename>' if ARGV.length != 1
 
-  content = File.read(ARGV[0], :encoding => 'utf-8')
-  cipher_text_with_auth_tag, salt, iv = extract_fields(content).values_at(:cipher_text_with_auth_tag, :salt, :iv)
+  obj = parse_json File.read(ARGV[0], :encoding => 'utf-8')
+  cipher_text_with_auth_tag, salt, iv = extract_fields(obj).values_at(:cipher_text_with_auth_tag, :salt, :iv)
   cipher_text, auth_tag = split_cipher_text(cipher_text_with_auth_tag).values_at(:cipher_text, :auth_tag)
 
   password = getpass('Enter 2FAS encrypted backup password: ')

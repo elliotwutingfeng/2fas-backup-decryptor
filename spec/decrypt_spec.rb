@@ -57,21 +57,23 @@ end
 
 describe 'extract_fields' do
   it 'Extracts fields if number of fields is valid' do
-    extracted = extract_fields('{"servicesEncrypted": "MQ==:Mg==:Mw=="}')
+    extracted = extract_fields(JSON.parse('{"servicesEncrypted": "MQ==:Mg==:Mw=="}', :symbolize_names => true))
     expected = { :cipher_text_with_auth_tag => '1', :salt => '2', :iv => '3' }
     extracted.each do |k, v|
       expect(v).to eq(expected[k])
     end
   end
   it 'Exit 1 if number of fields is invalid' do
-    test_vectors = ['{}', '{"servicesEncrypted": ""}',
+    test_vectors = ['[]', '{}', '{"servicesEncrypted": ""}',
                     '{"servicesEncrypted": "MQ=="}',
                     '{"servicesEncrypted": "MQ==:"}',
                     '{"servicesEncrypted": "MQ==:Mg=="}',
-                    '{"servicesEncrypted": "MQ==:Mg==:Mw==:NA=="}']
+                    '{"servicesEncrypted": "MQ==:Mg==:Mw==:NA=="}'].map do |s|
+                      JSON.parse(s, :symbolize_names => true)
+                    end
     silence do
-      test_vectors.each do |content|
-        expect { extract_fields(content) }.to raise_error(SystemExit) do |error|
+      test_vectors.each do |obj|
+        expect { extract_fields(obj) }.to raise_error(SystemExit) do |error|
           expect(error.status).to eq(1)
         end
       end
