@@ -25,6 +25,6 @@ RSpec.configure do |rspec|
     c.max_formatted_output_length = nil
   end
   rspec.run_all_when_everything_filtered = true
-  rspec.order = 'default'
+  rspec.order = :defined
   rspec.formatter = :documentation
 end
