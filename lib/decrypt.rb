@@ -105,7 +105,11 @@ def decrypt_ciphertext(cipher_text, password, salt, iv, auth_tag)
   decipher.auth_tag = auth_tag
   decipher.padding = 0
 
-  decipher.update(cipher_text) + decipher.final
+  begin
+    decipher.update(cipher_text) + decipher.final
+  rescue OpenSSL::Cipher::CipherError
+    terminate 'Failed to derive cipher key. Wrong password?'
+  end
 end
 
 #
@@ -123,18 +127,34 @@ def getpass(prompt)
   password
 end
 
-def main
-  terminate 'Usage: decrypt.rb <filename>' if ARGV.length != 1
-
-  obj = parse_json File.read(ARGV[0], :encoding => 'utf-8')
+#
+# Decrypt a vault file.
+#
+# Accept vault filename as a command-line argument, and decrypt it with password from user input.
+# If successful, return plaintext vault data as JSON String.
+#
+# @param [String] filename Vault file to decrypt
+#
+# @return [String] Plaintext vault as JSON String
+#
+def decrypt_vault
+  terminate "Usage: #{$PROGRAM_NAME} <filename>" if ARGV.length != 1
+  begin
+    obj = parse_json File.read(ARGV[0], :encoding => 'utf-8')
+  rescue Errno::ENOENT => e
+    terminate e.to_s
+  end
   cipher_text_with_auth_tag, salt, iv = extract_fields(obj).values_at(:cipher_text_with_auth_tag, :salt, :iv)
   cipher_text, auth_tag = split_cipher_text(cipher_text_with_auth_tag).values_at(:cipher_text, :auth_tag)
 
   password = getpass('Enter 2FAS encrypted backup password: ')
   plain_text = decrypt_ciphertext(cipher_text, password, salt, iv, auth_tag)
   parse_json(plain_text) # Ensure plain_text is valid JSON.
+  plain_text
+end
 
-  $stdout.write plain_text
+def main
+  $stdout.write decrypt_vault
 end
 
 main if __FILE__ == $PROGRAM_NAME
