@@ -124,7 +124,7 @@ def getpass(prompt)
 end
 
 def main
-  terminate 'Usage: decrypt.rb <filename>' if ARGV.length != 1
+  terminate "Usage: #{$PROGRAM_NAME} <filename>" if ARGV.length != 1
 
   obj = parse_json File.read(ARGV[0], :encoding => 'utf-8')
   cipher_text_with_auth_tag, salt, iv = extract_fields(obj).values_at(:cipher_text_with_auth_tag, :salt, :iv)
