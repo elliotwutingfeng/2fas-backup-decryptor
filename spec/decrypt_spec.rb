@@ -89,19 +89,24 @@ describe 'main' do
     expect($stderr).to receive(:puts)
     expect($stdout).to receive(:write) { |arg| output = arg }
     main
-    obj = JSON.parse(output, :symbolize_names => true)
-    expected_obj = [{ :name => 'example.com', :secret => 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA',
-                      :updatedAt => 1_704_874_073_731,
-                      :otp => { :label => '', :account => '', :digits => 6, :period => 30, :algorithm => 'SHA1',
-                                :tokenType => 'TOTP', :source => 'Manual' }, :order => { :position => 0 },
-                      :icon => { :selected => 'Label', :label => { :text => 'EX', :backgroundColor => 'Orange' },
-                                 :iconCollection => { :id => 'a5b3fb65-4ec5-43e6-8ec1-49e24ca9e7ad' } } }]
-    expect(obj).to eq(expected_obj)
+    expected_plaintext_vault = File.read('test/plaintext_test.json', :encoding => 'utf-8')
+    expect(output).to eq expected_plaintext_vault
   end
   it 'Wrong password -> Decryption failure' do
     ARGV.replace ['test/encrypted_test.2fas']
     allow($stdin).to receive(:noecho) { '' }
-    expect { main }.to raise_error(OpenSSL::Cipher::CipherError)
+    expect { main }.to raise_error(SystemExit) do |error|
+      expect(error.status).to eq(1)
+    end
+  end
+  it 'No such file or directory -> SystemExit' do
+    ARGV.replace ['test/encrypted_test_that_does_not_exist.json']
+    allow($stdin).to receive(:noecho) { '' }
+    silence do
+      expect { main }.to raise_error(SystemExit) do |error|
+        expect(error.status).to eq(1)
+      end
+    end
   end
   it 'Accepts exactly 1 argument' do
     test_vectors = [[], ['test/encrypted_test.2fas', 'another'], ['test/encrypted_test.2fas', 'yet another']]
