@@ -15,7 +15,6 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 require 'csv'
-require_relative 'decrypt'
 
 #
 # Recursively flatten a nested JSON object into a single-level hash
@@ -83,5 +82,3 @@ def beautify(raw_csv)
   end
   output
 end
-
-$stdout.write beautify entries_to_csv decrypt_vault if __FILE__ == $PROGRAM_NAME
