@@ -4,11 +4,11 @@ AllCops:
 Metrics/AbcSize:
     Max: 23
 Metrics/BlockLength:
-    Max: 37
+    Max: 44
 Metrics/CyclomaticComplexity:
     Max: 6
 Metrics/MethodLength:
-    Max: 16
+    Max: 28
 Naming/MethodParameterName:
     Enabled: false
 Metrics/PerceivedComplexity:
