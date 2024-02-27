@@ -23,7 +23,6 @@ ENCRYPTED_TEST_VAULT = 'test/encrypted_test.2fas'.freeze
 def silence(filter = '')
   @original_stderr = $stderr
   @original_stdout = $stdout
-
   $stderr = StringIO.new if filter != 'stdout'
   $stdout = StringIO.new if filter != 'stderr'
 
