@@ -15,6 +15,20 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 require 'csv'
+require 'json'
+
+#
+# Parse `plain_text` string as JSON object
+#
+# @param [String] plain_text Encoded JSON string
+#
+# @return [BasicObject] JSON object
+#
+def parse_json(plain_text)
+  JSON.parse(plain_text, :symbolize_names => true)
+rescue JSON::ParserError => e
+  terminate e.message
+end
 
 #
 # Recursively flatten a nested JSON object into a single-level hash
@@ -25,8 +39,8 @@ require 'csv'
 # @return [Hash] Flattened JSON data where keys are concatenated
 #  with dots to represent nested structure
 #
-def flatten_json(balanced_json_data, parent_key)
-  balanced_json_data.each_with_object({}) do |(key, value), hash|
+def flatten_json(json_data, parent_key)
+  json_data.each_with_object({}) do |(key, value), hash|
     new_key = parent_key.empty? ? key.to_sym : :"#{parent_key}.#{key}"
     if value.is_a?(Hash)
       hash.merge!(flatten_json(value, new_key))

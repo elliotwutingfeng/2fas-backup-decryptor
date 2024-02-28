@@ -16,7 +16,6 @@
 
 require 'base64'
 require 'io/console'
-require 'json'
 require 'openssl'
 require 'optparse'
 
@@ -38,19 +37,6 @@ def assert_is_hash(obj)
   return if obj.is_a? Hash
 
   terminate 'Invalid vault file. Top-level is not Hash.'
-end
-
-#
-# Parse `plain_text` string as JSON object
-#
-# @param [String] plain_text Encoded JSON string
-#
-# @return [BasicObject] JSON object
-#
-def parse_json(plain_text)
-  JSON.parse(plain_text, :symbolize_names => true)
-rescue JSON::ParserError => e
-  terminate e.message
 end
 
 #
