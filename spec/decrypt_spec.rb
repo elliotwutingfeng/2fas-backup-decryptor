@@ -117,7 +117,7 @@ describe 'main' do
       end
     end
   end
-  it 'Terminates if format is `json` and `--except` fields are included' do
+  it 'Terminates if `--format` is `json` and `--except` fields are included' do
     silence do
       ARGV.replace [ENCRYPTED_TEST_VAULT, '-f', 'json', '-e', 'field']
       expect { main }.to raise_error(SystemExit) do |error|
