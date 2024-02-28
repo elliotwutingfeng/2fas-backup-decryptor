@@ -66,6 +66,24 @@ a5b3fb65-4ec5-43e6-8ec1-49e24ca9e7ad  Brown                       BO            
 a5b3fb65-4ec5-43e6-8ec1-49e24ca9e7ad  Brown                       AI               Label          Air Canada  4               Benjamin     SHA256         10           8           Air Canada  Benjamin   otpauth://hotp/Benjamin?secret=KUVJJOM753IHTNDSZVCNKL7GII&issuer=Air%20Canada&counter=10&algorithm=SHA256&digits=8              Link        HOTP           KUVJJOM753IHTNDSZVCNKL7GII  1708958401763
 ```
 
+### Hiding unwanted fields
+
+When the `-f / --format` option is set to `csv` or `pretty`, you can use the `-e / --except` option to hide unwanted fields.
+
+```bash
+# Enter the above password when prompted
+ruby lib/decrypt.rb test/encrypted_test.2fas -f pretty -e icon.iconCollection.id,icon.label.backgroundColor,icon.label.text,icon.selected,order.position,otp.link,name,otp.account,otp.source,updatedAt,otp.counter
+```
+
+```csv
+otp.algorithm  otp.counter  otp.digits  otp.issuer  otp.label  otp.period  otp.tokenType  secret
+SHA1                        6           Deno        Mason      30          TOTP           4SJHB4GSD43FZBAI7C2HLRJGPQ
+SHA256                      7           SPDX        James      30          TOTP           5OM4WOOGPLQEF6UGN3CPEOOLWU
+SHA512                      8           Airbnb      Elijah     60          TOTP           7ELGJSGXNCCTV3O6LKJWYFV2RA
+SHA1                        5           Boeing      Sophia     10          STEAM          JRZCL47CMXVOQMNPZR2F7J4RGI
+SHA256         10           8           Air Canada  Benjamin               HOTP           KUVJJOM753IHTNDSZVCNKL7GII
+```
+
 ## Testing
 
 ```bash

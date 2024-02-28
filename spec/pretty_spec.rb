@@ -14,6 +14,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+require 'csv'
 require 'spec_helper'
 require 'pretty'
 
@@ -27,6 +28,12 @@ describe 'parse_json' do
         expect(error.status).to eq(1)
       end
     end
+  end
+end
+
+describe 'remove_fields' do
+  it 'Removes fields from CSV String correctly' do
+    expect(CSV.parse(remove_fields("a,b,c\n1,2,3", %w[a c]), :headers => true).headers).to eq ['b']
   end
 end
 

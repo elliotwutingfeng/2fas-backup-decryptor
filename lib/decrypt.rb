@@ -148,7 +148,7 @@ end
 #
 def main
   formats = %i[json csv pretty]
-  options = { :format => :json }
+  options = { :format => :json, :except => [] }
 
   parser = OptionParser.new do |opts|
     opts.banner = "Usage: #{$PROGRAM_NAME} <filename> [options]"
@@ -156,7 +156,11 @@ def main
             "Plaintext vault output format; pick one from #{formats.map(&:to_s)}") do |f|
       options[:format] = f
     end
-    opts.on('-h', '--help', 'Show this message') do
+    opts.on('-e', '--except x,y,z', Array,
+            'Specify fields to hide; for example, `-e order.position,icon.iconCollection.id`') do |e|
+      options[:except] = e
+    end
+    opts.on_tail('-h', '--help', 'Show this message') do
       puts opts
       exit 0
     end
@@ -164,7 +168,12 @@ def main
 
   begin
     parser.parse! ARGV
-    raise StandardError,  "invalid number of arguments: expected 1, got #{ARGV.length}" if ARGV.length != 1
+    raise StandardError, "invalid number of arguments: expected 1, got #{ARGV.length}" if ARGV.length != 1
+
+    if options[:format] == :json && !options[:except].empty?
+      raise StandardError,
+            'hiding fields is only supported for `csv` and `pretty` formats'
+    end
   rescue StandardError => e
     terminate "#{e}\n#{parser}"
   end
@@ -172,9 +181,9 @@ def main
   plain_text = decrypt_vault(ARGV[0])
   $stdout.write case options[:format]
                 when :pretty
-                  beautify entries_to_csv plain_text
+                  beautify remove_fields(entries_to_csv(plain_text), options[:except])
                 when :csv
-                  entries_to_csv plain_text
+                  remove_fields(entries_to_csv(plain_text), options[:except])
                 else
                   plain_text
                 end

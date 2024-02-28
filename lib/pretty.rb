@@ -71,6 +71,22 @@ def entries_to_csv(plain_text)
 end
 
 #
+# Remove specified fields from a CSV string. Non-existent fields are silently ignored.
+#
+# @param [String] raw_csv CSV String
+# @param [Array<String>] fields_to_remove Field names to be removed from the CSV String
+#
+# @return [String] CSV String with specified fields removed
+#
+def remove_fields(raw_csv, fields_to_remove)
+  csv_data = CSV.parse(raw_csv, :headers => true)
+  fields_to_remove.each do |field_name|
+    csv_data.delete field_name
+  end
+  csv_data.to_s
+end
+
+#
 # Make a beautiful CSV-like String padded with spaces.
 #
 # @param [String] raw_csv CSV String
