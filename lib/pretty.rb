@@ -31,7 +31,7 @@ rescue JSON::ParserError => e
 end
 
 #
-# Recursively flatten a nested JSON object into a single-level hash
+# Recursively flatten a nested JSON object into a single-level hash.
 #
 # @param [Hash] json_data JSON object to be flattened
 # @param [String] parent_key Parent key for the current level
@@ -45,13 +45,13 @@ def flatten_json(json_data, parent_key)
     if value.is_a?(Hash)
       hash.merge!(flatten_json(value, new_key))
     else
-      hash[new_key] = value
+      hash[new_key] = value.is_a?(Array) ? value.to_json : value # Do not unpack arrays.
     end
   end
 end
 
 #
-# Convert JSON array String plain_text to CSV String
+# Convert JSON array String plain_text to CSV String.
 #
 # @param [String] plain_text JSON String
 #
@@ -71,7 +71,7 @@ def entries_to_csv(plain_text)
 end
 
 #
-# Make a beautiful CSV-like String padded with spaces
+# Make a beautiful CSV-like String padded with spaces.
 #
 # @param [String] raw_csv CSV String
 #
