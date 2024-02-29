@@ -68,7 +68,7 @@ a5b3fb65-4ec5-43e6-8ec1-49e24ca9e7ad  Brown                       AI            
 
 ### Hiding unwanted fields
 
-When the `-f / --format` option is set to `csv` or `pretty`, you can use the `-e / --except` option to hide unwanted fields.
+When the `-f / --format` option is set to `csv` or `pretty`, you can use the `-e / --except` option to hide unwanted fields. Non-existent fields are silently ignored.
 
 ```bash
 # Enter the above password when prompted
