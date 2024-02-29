@@ -26,8 +26,8 @@ require 'json'
 #
 def parse_json(plain_text)
   JSON.parse(plain_text, :symbolize_names => true)
-rescue JSON::ParserError => e
-  terminate e.message
+rescue JSON::ParserError
+  terminate 'Failed to parse JSON file. Invalid JSON?'
 end
 
 #
