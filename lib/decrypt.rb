@@ -16,7 +16,6 @@
 
 require 'base64'
 require 'io/console'
-require 'openssl'
 require 'optparse'
 
 require_relative 'crypto'

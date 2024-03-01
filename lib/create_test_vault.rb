@@ -15,7 +15,6 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 require 'base64'
-require 'openssl'
 
 require_relative 'crypto'
 

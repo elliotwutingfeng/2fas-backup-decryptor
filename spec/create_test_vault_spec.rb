@@ -17,7 +17,6 @@
 require 'spec_helper'
 require 'create_test_vault'
 require 'crypto'
-require 'decrypt'
 
 describe 'encrypt_vault' do
   it 'Encrypts vault correctly' do

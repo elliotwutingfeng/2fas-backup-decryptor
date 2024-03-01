@@ -14,8 +14,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-require 'spec_helper'
 require 'decrypt'
+require 'spec_helper'
 
 ENCRYPTED_TEST_VAULT = 'test/encrypted_test.2fas'.freeze
 
