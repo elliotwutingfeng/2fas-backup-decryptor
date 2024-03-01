@@ -161,10 +161,16 @@ end
 def encrypt_vault(plain_text, password, salt, iv)
   cipher_text_with_auth_tag = encrypt_ciphertext(plain_text, password, Base64.strict_decode64(salt),
                                                  Base64.strict_decode64(iv))
+  reference = 'tRViSsLKzd86Hprh4ceC2OP7xazn4rrt4xhfEUbOjxLX8Rc3mkISXE0lWbmnWfggogbBJhtYgpK6fMl1D6m' \
+              'tsy92R3HkdGfwuXbzLebqVFJsR7IZ2w58t938iymwG4824igYy1wi6n2WDpO1Q1P69zwJGs2F5a1qP4MyIiDSD7NCV2OvidX' \
+              'QCBnDlGfmz0f1BQySRkkt4ryiJeCjD2o4QsveJ9uDBUn8ELyOrESv5R5DMDkD4iAF8TXU7KyoJujd'
+  encrypted_reference_with_auth_tag = encrypt_ciphertext(reference, password, Base64.strict_decode64(salt),
+                                                         Base64.strict_decode64(iv))
   '{"services":[],"groups":[],"updatedAt":1708958781890,"schemaVersion":4,"appVersionCode":5000017,' \
     '"appVersionName":"5.3.5","appOrigin":"android","servicesEncrypted":' \
     "\"#{cipher_text_with_auth_tag}:#{salt}:#{iv}\"," \
-    '"reference":"lPyg4X0eUVHys/yulzNkR2lVONpCe5KK883sl+ir6B6bYbu2+69nN0bUDI9B9X53DKs3/54JqYRhYrI0a6It9SWR9NHJc1jsAXg0G8tqVOcQdcf4rdhYIg5VJh77h5wSTqt70aH6kfo9IhiTEfRFSDScny0qH1YxzqlDQm3Uw1jHdwW6UFFAA+3/uSTmcD4aoeknWbXP8GwH4z/ORM9VmonyX85LY4tszMjeTeb2U/hjxVaMluJYCn8VFzGsZqec3ayt8E7cHTusGy0tr+gGtM7Fm/iBYUwAUCaOS9XZQhyB3tJq2gNp5ajsS6zEJsKhWXyNU/f0ircshOUGRLm1eCSAiexGT/3/avGkoZMExqY=:xsCM/GAwNcyqrDcYodp58e6xxXl+cj0P+1Bh9mH4f7+UYKrQV4cpMAbQRPyNJz5CbsvSsFGYr+Ls1N+GyX6fp8LahIyovloySTRqQZzBI0VgKTKy1g7PlSSVjhedokyK5osUg6lUTimr29SGyvL4r/ornfkKygDZry8gHjyANX06mfxBK46+qomjsw5TErS0VlitPMJ1OWoh5/ZArEZBSczTGSOLjdQ3uMkQGOEUCJAd9wruBViN7td/0tmBAhzkG7EtrOJN7YNCGSLCiRoeLqS+unbaIOmUeKyn2AWd+jT/k4WcxIkHlYPRumy1DzS/REh6NUfagoO/1fPLMUYUug==:Jz6KfVsBSV9u04o2"}'
+    '"reference":' \
+    "\"#{encrypted_reference_with_auth_tag}:#{salt}:#{iv}\"}"
 end
 
 #

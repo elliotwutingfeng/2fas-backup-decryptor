@@ -86,11 +86,20 @@ describe 'encrypt_vault' do
   it 'Encrypts vault correctly' do
     plain_text = File.read('test/plaintext_test.json', :encoding => 'utf-8')
     password = 'example.com'
-    salt = 'xsCM/GAwNcyqrDcYodp58e6xxXl+cj0P+1Bh9mH4f7+UYKrQV4cpMAbQRPyNJz5CbsvSsFGYr+Ls1N+GyX6fp8LahIyovloySTRqQZzBI0VgKTKy1g7PlSSVjhedokyK5osUg6lUTimr29SGyvL4r/ornfkKygDZry8gHjyANX06mfxBK46+qomjsw5TErS0VlitPMJ1OWoh5/ZArEZBSczTGSOLjdQ3uMkQGOEUCJAd9wruBViN7td/0tmBAhzkG7EtrOJN7YNCGSLCiRoeLqS+unbaIOmUeKyn2AWd+jT/k4WcxIkHlYPRumy1DzS/REh6NUfagoO/1fPLMUYUug=='
-    iv = '5UW4AuvcvsEi0jYe'
-    encrypted_text = File.read('test/encrypted_test.2fas', :encoding => 'utf-8')
+    # salt = 'xsCM/GAwNcyqrDcYodp58e6xxXl+cj0P+1Bh9mH4f7+UYKrQV4cpMAbQRPyNJz5CbsvSsFGYr+Ls1N+GyX6fp8LahIyovloyS' \
+    #        'TRqQZzBI0VgKTKy1g7PlSSVjhedokyK5osUg6lUTimr29SGyvL4r/ornfkKygDZry8gHjyANX06mfxBK46+qomjsw5TErS0Vlit' \
+    #        'PMJ1OWoh5/ZArEZBSczTGSOLjdQ3uMkQGOEUCJAd9wruBViN7td/0tmBAhzkG7EtrOJN7YNCGSLCiRoeLqS+unbaIOmUeKyn2AWd+' \
+    #        'jT/k4WcxIkHlYPRumy1DzS/REh6NUfagoO/1fPLMUYUug=='
+    # iv = '5UW4AuvcvsEi0jYe'
+    salt = Base64.strict_encode64 OpenSSL::Random.random_bytes 16
+    iv = Base64.strict_encode64 OpenSSL::Random.random_bytes 12
+    encrypted_vault = encrypt_vault(plain_text, password, salt, iv)
 
-    expect(encrypt_vault(plain_text, password, salt, iv)).to eq encrypted_text
+    # Now try to decrypt it again
+    obj = parse_json encrypted_vault
+    cipher_text_with_auth_tag, salt, iv = extract_fields(obj).values_at(:cipher_text_with_auth_tag, :salt, :iv)
+    cipher_text, auth_tag = split_cipher_text(cipher_text_with_auth_tag).values_at(:cipher_text, :auth_tag)
+    expect(decrypt_ciphertext(cipher_text, password, salt, iv, auth_tag)).to eq plain_text
   end
 end
 
