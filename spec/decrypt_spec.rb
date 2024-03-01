@@ -19,6 +19,24 @@ require 'decrypt'
 
 ENCRYPTED_TEST_VAULT = 'test/encrypted_test.2fas'.freeze
 
+# salt and iv are randomly generated via `Base64.strict_encode64 OpenSSL::Random.random_bytes(LENGTH)` where
+# `LENGTH` is 256 for salt and 12 for iv.
+SALT_AND_IV_TEST_VECTORS = [
+  [
+    'ZV0cVL+4EPjkJ8X4sEoja38u9BbAf8PX5rNCrBHrJgaUlSvmS7xKtgbhD8bmZNf5vhQyVVXIge/oAC/PKosEBrtfZ8HAYeSsqV' \
+    'wg9tEr5V+NG1EV+o7F0y94agQvyTBjLRP/8nYJwnoNuEO3oK9AqAqmfSBjCgSZNzFPsjp9wh896GsMr/VOl3proD9btsc4H' \
+    'HG/0RB0KMtTaWYd3lMfHUPzHDDwvlXOiEJNJNhEzCk6qa5ISI+6hNbgsPhlWowHvBV8+WJKa2w4jceAKXP8w/ftESHZRabw' \
+    'iMrGJsXoZ0FobI2Xq0gfcEy06LUrf08b6b8Tt0JEtkc+RZ0ncyUMaA==', '6/dS+1PWwlE8Jwuy'
+  ], ['GlnfpJEabZKxXQsI/DKzPK90dQwRl9z1jZuGTjKhPBBF+SpWaQiHhT2b6Tu4l/I06+f1pRL8WsUqCXOar0MQo3MgG0kl' \
+      'ybPP8HL8h2Pj6wCqDSwTxQIU2pIxDtLC30rIdfbDBAn63pzDhPY1R//zRy5LbL3dpY/5AERYUF1A1Osxc7TnWDExjUBbK/kvN' \
+      '6vZwlVcwpHcnzgX0ota7yC1yY0mZ4ek7gn/WaLwWZoyFK4qYZlVON4Zo8olpH3J/D8uRyN0/raqCvCgunPxtr7MwzJJ1uyoz7' \
+      'PbqqLq7Jh3gjtjt80j1gVUM0QAUQwLeQlJABg9rHXjatoZZClfLi/lCg==', 'c9Rrz0ywTPZ3sBUi'],
+  ['Jljh8tr1hrFYla54digxTTJyrx0ISp4z/jjgptBqiHB/WQkqgqpraAe9WS0pir8jXRYYctocMyrYOqPlaoRyeMkd027Pt18Ob' \
+   'SxCM7M3jV87WTBDuiqmwjm9oLvZCflALQUmQjOWVdLz5rg6Qa2d1alSP5zRiOIrtgADdbfa1VGzScNRPhxl1XuRlm5NVyk2wvbMy' \
+   'cwxUTQP3YLrzI2afXk9evZCJSbpsap6Kjv9iI2ztuMF7jIloQC/SUs/0qJGXbHToLgTklr3GoQgSpCECUbjeH1e3m+Z8TNedv2qv' \
+   'QDxrkiP6FPJYvOaOFVM6PGbrUMflif8gR2oMdxzQ2xZVg==', 'tUNqsK9OSBXrbLCS']
+].freeze
+
 # See https://michaelay.github.io/blog/2014/12/15/suppress-stdout-and-stderr-when-running-rspec
 def silence(filter = '')
   @original_stderr = $stderr
@@ -70,6 +88,45 @@ describe 'extract_fields' do
   end
 end
 
+describe 'encrypt_vault' do
+  it 'Encrypts vault correctly' do
+    expected_plain_text = File.read('test/plaintext_test.json', :encoding => 'utf-8')
+    password = 'example.com'
+
+    SALT_AND_IV_TEST_VECTORS.each do |salt, iv|
+      # String.swapcase simulates different iv for servicesEncrypted and reference.
+      # In practice, for AES-GCM, both iv must be distinct and randomly generated.
+      encrypted_vault = encrypt_vault(expected_plain_text, password, salt, iv, iv.swapcase)
+      # Now decrypt it and check that its plaintext form matches the expected plaintext.
+      obj = parse_json encrypted_vault
+      cipher_text_with_auth_tag, salt, iv = extract_fields(obj).values_at(:cipher_text_with_auth_tag, :salt, :iv)
+      cipher_text, auth_tag = split_cipher_text(cipher_text_with_auth_tag).values_at(:cipher_text, :auth_tag)
+      plain_text, = decrypt_ciphertext(cipher_text, password, salt, iv, auth_tag)
+      expect(plain_text).to eq expected_plain_text
+    end
+  end
+end
+
+describe 'encrypt_plaintext' do
+  it 'Fails to encrypt empty plaintext' do
+    silence('stderr') do
+      expect { encrypt_vault('', '', '', '', '') }.to raise_error(SystemExit) do |error|
+        expect(error.status).to eq(1)
+      end
+    end
+  end
+end
+
+describe 'decrypt_ciphertext' do
+  it 'Fails to decrypt empty ciphertext' do
+    silence('stderr') do
+      expect { decrypt_ciphertext('', '', '', '', '') }.to raise_error(SystemExit) do |error|
+        expect(error.status).to eq(1)
+      end
+    end
+  end
+end
+
 def decryption_test(args, expected_plaintext_filename)
   ARGV.replace args
   allow($stdin).to receive(:noecho) { 'example.com' } # Backup file password
@@ -80,27 +137,6 @@ def decryption_test(args, expected_plaintext_filename)
   end
   expected_plaintext_vault = File.read(expected_plaintext_filename, :encoding => 'utf-8')
   expect(output).to eq expected_plaintext_vault
-end
-
-describe 'encrypt_vault' do
-  it 'Encrypts vault correctly' do
-    plain_text = File.read('test/plaintext_test.json', :encoding => 'utf-8')
-    password = 'example.com'
-    # salt = 'xsCM/GAwNcyqrDcYodp58e6xxXl+cj0P+1Bh9mH4f7+UYKrQV4cpMAbQRPyNJz5CbsvSsFGYr+Ls1N+GyX6fp8LahIyovloyS' \
-    #        'TRqQZzBI0VgKTKy1g7PlSSVjhedokyK5osUg6lUTimr29SGyvL4r/ornfkKygDZry8gHjyANX06mfxBK46+qomjsw5TErS0Vlit' \
-    #        'PMJ1OWoh5/ZArEZBSczTGSOLjdQ3uMkQGOEUCJAd9wruBViN7td/0tmBAhzkG7EtrOJN7YNCGSLCiRoeLqS+unbaIOmUeKyn2AWd+' \
-    #        'jT/k4WcxIkHlYPRumy1DzS/REh6NUfagoO/1fPLMUYUug=='
-    # iv = '5UW4AuvcvsEi0jYe'
-    salt = Base64.strict_encode64 OpenSSL::Random.random_bytes 16
-    iv = Base64.strict_encode64 OpenSSL::Random.random_bytes 12
-    encrypted_vault = encrypt_vault(plain_text, password, salt, iv)
-
-    # Now try to decrypt it again
-    obj = parse_json encrypted_vault
-    cipher_text_with_auth_tag, salt, iv = extract_fields(obj).values_at(:cipher_text_with_auth_tag, :salt, :iv)
-    cipher_text, auth_tag = split_cipher_text(cipher_text_with_auth_tag).values_at(:cipher_text, :auth_tag)
-    expect(decrypt_ciphertext(cipher_text, password, salt, iv, auth_tag)).to eq plain_text
-  end
 end
 
 describe 'main' do

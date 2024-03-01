@@ -28,6 +28,11 @@ SERVICES_ENCRYPTED_FIELD_LENGTH = 3
 HASH = 'sha256'.freeze
 ENCRYPTION_CIPHER = 'aes-256-gcm'.freeze
 
+# https://github.com/twofas/2fas-android/blob/main/data/services/src/main/java/com/twofasapp/data/services/domain/BackupContent.kt
+REFERENCE = 'tRViSsLKzd86Hprh4ceC2OP7xazn4rrt4xhfEUbOjxLX8Rc3mkISXE0lWbmnWfggogbBJhtYgpK6fMl1D6m' \
+            'tsy92R3HkdGfwuXbzLebqVFJsR7IZ2w58t938iymwG4824igYy1wi6n2WDpO1Q1P69zwJGs2F5a1qP4MyIiDSD7NCV2OvidX' \
+            'QCBnDlGfmz0f1BQySRkkt4ryiJeCjD2o4QsveJ9uDBUn8ELyOrESv5R5DMDkD4iAF8TXU7KyoJujd'.freeze
+
 def terminate(message)
   warn message
   exit 1
@@ -41,7 +46,7 @@ end
 
 #
 # Extract the `cipher_text_with_auth_tag`, `salt`, and `iv` bytes fields
-# located at the `:servicesEncrypted` key of JSON Hash `obj`
+# located at the `:servicesEncrypted` key of JSON Hash `obj`.
 #
 # @param [Hash] obj JSON Hash
 #
@@ -58,7 +63,7 @@ def extract_fields(obj)
 end
 
 #
-# Separate cipher text from 16-byte AES-GCM authentication tag
+# Separate cipher text from 16-byte AES-GCM authentication tag.
 # Reference: https://crypto.stackexchange.com/a/63539
 #
 # @param [String] cipher_text_with_auth_tag Cipher text with AES-GCM authentication tag as bytes
@@ -75,7 +80,48 @@ def split_cipher_text(cipher_text_with_auth_tag)
 end
 
 #
-# Decrypt `cipher_text` and return the plaintext result as String
+# Derive a key from the given password and salt using PBKDF2-HMAC.
+#
+# @param [String] password Backup file password as plaintext
+# @param [String] salt HMAC salt as bytes
+#
+# @return [String] Derived key
+#
+def derive_key(password, salt)
+  OpenSSL::PKCS5.pbkdf2_hmac(password, salt, ITERATIONS, KEY_LENGTH / 8,
+                             HASH)
+end
+
+#
+# Perform AES-GCM encryption or decryption.
+#
+# @param [String] text Text to be encrypted or decrypted
+# @param [String] master_key AES-GCM master key
+# @param [String] iv AES-GCM initialization vector
+# @param [Boolean] encrypt Specify whether encryption or decryption should be performed
+# @param [String, nil] auth_tag AES-GCM authentication tag used for decryption. Will not be used if `encrypt` is true.
+#
+# @return [Array<String>] 2-element Array where first element is resulting ciphertext or plaintext, and second element
+#  is the AES-GCM authentication tag
+#
+def aes_gcm(text, master_key, iv, encrypt, auth_tag = nil)
+  cipher = OpenSSL::Cipher.new ENCRYPTION_CIPHER
+  if encrypt
+    cipher.encrypt
+  else
+    cipher.decrypt
+  end
+  cipher.key = master_key
+  cipher.iv = iv
+  cipher.auth_tag = auth_tag unless encrypt
+  cipher.auth_data = ''
+  cipher.padding = 0
+
+  [cipher.update(text) + cipher.final, encrypt ? cipher.auth_tag : auth_tag]
+end
+
+#
+# Decrypt `cipher_text` and return its plaintext and authentication tag.
 #
 # @param [String] cipher_text Encrypted text as bytes to be decrypted
 # @param [String] password Backup file password as plaintext
@@ -83,41 +129,34 @@ end
 # @param [String] iv AES-GCM initialization vector as bytes
 # @param [String] auth_tag AES-GCM authentication tag as bytes
 #
-# @return [String] Decrypted `cipher_text`
+# @return [Array<String>] 2-element Array where first element is resulting plaintext, and second element
+#  is the AES-GCM authentication tag
 #
 def decrypt_ciphertext(cipher_text, password, salt, iv, auth_tag)
-  decipher = OpenSSL::Cipher.new ENCRYPTION_CIPHER
-  decipher.decrypt
-  decipher.key = OpenSSL::PKCS5.pbkdf2_hmac(password, salt, ITERATIONS, KEY_LENGTH / 8,
-                                            HASH)
-  decipher.iv = iv
-  decipher.auth_tag = auth_tag
-  decipher.auth_data = ''
-  decipher.padding = 0
-
-  begin
-    decipher.update(cipher_text) + decipher.final
-  rescue OpenSSL::Cipher::CipherError
-    terminate 'Failed to derive cipher key. Wrong password?'
-  end
+  encrypt = false
+  master_key = derive_key(password, salt)
+  aes_gcm(cipher_text, master_key, iv, encrypt, auth_tag)
+rescue OpenSSL::Cipher::CipherError, ArgumentError => e
+  terminate "Failed to derive cipher key. #{e.instance_of?(ArgumentError) ? e.message : 'Wrong password?'}"
 end
 
-def encrypt_ciphertext(plain_text, password, salt, iv)
-  encipher = OpenSSL::Cipher.new ENCRYPTION_CIPHER
-  encipher.encrypt
-  encipher.key = OpenSSL::PKCS5.pbkdf2_hmac(password, salt, ITERATIONS, KEY_LENGTH / 8,
-                                            HASH)
-  encipher.iv = iv
-  encipher.auth_data = ''
-  encipher.padding = 0
-
-  begin
-    encrypted = encipher.update(plain_text) + encipher.final
-    auth_tag = encipher.auth_tag
-  rescue OpenSSL::Cipher::CipherError
-    terminate 'Failed to encrypt plaintext. Wrong parameters?'
-  end
-  Base64.strict_encode64(encrypted + auth_tag)
+#
+# Encrypt `plain_text` and return its ciphertext and authentication tag.
+#
+# @param [String] plain_text bytes to be encrypted
+# @param [String] password Backup file password as plaintext
+# @param [String] salt HMAC salt as bytes
+# @param [String] iv AES-GCM initialization vector as bytes
+#
+# @return [Array<String>] 2-element Array where first element is resulting ciphertext, and second element
+#  is the AES-GCM authentication tag
+#
+def encrypt_plaintext(plain_text, password, salt, iv)
+  encrypt = true
+  master_key = derive_key(password, salt)
+  aes_gcm(plain_text, master_key, iv, encrypt)
+rescue OpenSSL::Cipher::CipherError, ArgumentError => e
+  terminate "Failed to encrypt plaintext. #{e.instance_of?(ArgumentError) ? e.message : 'Invalid parameters?'}"
 end
 
 #
@@ -153,24 +192,35 @@ def decrypt_vault(filename)
   cipher_text, auth_tag = split_cipher_text(cipher_text_with_auth_tag).values_at(:cipher_text, :auth_tag)
 
   password = getpass('Enter 2FAS encrypted backup password: ')
-  plain_text = decrypt_ciphertext(cipher_text, password, salt, iv, auth_tag)
+  plain_text, = decrypt_ciphertext(cipher_text, password, salt, iv, auth_tag)
   parse_json(plain_text) # Ensure plain_text is valid JSON.
   plain_text
 end
 
-def encrypt_vault(plain_text, password, salt, iv)
-  cipher_text_with_auth_tag = encrypt_ciphertext(plain_text, password, Base64.strict_decode64(salt),
-                                                 Base64.strict_decode64(iv))
-  reference = 'tRViSsLKzd86Hprh4ceC2OP7xazn4rrt4xhfEUbOjxLX8Rc3mkISXE0lWbmnWfggogbBJhtYgpK6fMl1D6m' \
-              'tsy92R3HkdGfwuXbzLebqVFJsR7IZ2w58t938iymwG4824igYy1wi6n2WDpO1Q1P69zwJGs2F5a1qP4MyIiDSD7NCV2OvidX' \
-              'QCBnDlGfmz0f1BQySRkkt4ryiJeCjD2o4QsveJ9uDBUn8ELyOrESv5R5DMDkD4iAF8TXU7KyoJujd'
-  encrypted_reference_with_auth_tag = encrypt_ciphertext(reference, password, Base64.strict_decode64(salt),
-                                                         Base64.strict_decode64(iv))
+#
+# Encrypt vault with given AES-GCM parameters.
+# If successful, return encrypted vault as JSON String.
+#
+# @param [String] plain_text Vault contents
+# @param [String] password Vault password
+# @param [String] salt HMAC salt as bytes
+# @param [String] iv Vault AES-GCM initialization vector as bytes
+# @param [String] reference_iv Reference AES-GCM initialization vector as bytes
+#
+# @return [String] Encrypted vault as JSON String
+#
+def encrypt_vault(plain_text, password, salt, iv, reference_iv)
+  cipher_text, auth_tag = encrypt_plaintext(plain_text, password, Base64.strict_decode64(salt),
+                                            Base64.strict_decode64(iv))
+  cipher_text_with_auth_tag = Base64.strict_encode64(cipher_text + auth_tag)
+  reference_cipher_text, reference_auth_tag = encrypt_plaintext(REFERENCE, password, Base64.strict_decode64(salt),
+                                                                Base64.strict_decode64(reference_iv))
+  reference_cipher_text_with_auth_tag = Base64.strict_encode64(reference_cipher_text + reference_auth_tag)
   '{"services":[],"groups":[],"updatedAt":1708958781890,"schemaVersion":4,"appVersionCode":5000017,' \
     '"appVersionName":"5.3.5","appOrigin":"android","servicesEncrypted":' \
     "\"#{cipher_text_with_auth_tag}:#{salt}:#{iv}\"," \
     '"reference":' \
-    "\"#{encrypted_reference_with_auth_tag}:#{salt}:#{iv}\"}"
+    "\"#{reference_cipher_text_with_auth_tag}:#{salt}:#{reference_iv}\"}"
 end
 
 #
