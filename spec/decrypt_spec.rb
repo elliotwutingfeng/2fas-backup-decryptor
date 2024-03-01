@@ -82,6 +82,18 @@ def decryption_test(args, expected_plaintext_filename)
   expect(output).to eq expected_plaintext_vault
 end
 
+describe 'encrypt_vault' do
+  it 'Encrypts vault correctly' do
+    plain_text = File.read('test/plaintext_test.json', :encoding => 'utf-8')
+    password = 'example.com'
+    salt = 'xsCM/GAwNcyqrDcYodp58e6xxXl+cj0P+1Bh9mH4f7+UYKrQV4cpMAbQRPyNJz5CbsvSsFGYr+Ls1N+GyX6fp8LahIyovloySTRqQZzBI0VgKTKy1g7PlSSVjhedokyK5osUg6lUTimr29SGyvL4r/ornfkKygDZry8gHjyANX06mfxBK46+qomjsw5TErS0VlitPMJ1OWoh5/ZArEZBSczTGSOLjdQ3uMkQGOEUCJAd9wruBViN7td/0tmBAhzkG7EtrOJN7YNCGSLCiRoeLqS+unbaIOmUeKyn2AWd+jT/k4WcxIkHlYPRumy1DzS/REh6NUfagoO/1fPLMUYUug=='
+    iv = '5UW4AuvcvsEi0jYe'
+    encrypted_text = File.read('test/encrypted_test.2fas', :encoding => 'utf-8')
+
+    expect(encrypt_vault(plain_text, password, salt, iv)).to eq encrypted_text
+  end
+end
+
 describe 'main' do
   it 'Correct password -> Decryption success' do
     ['-f', '--format'].each do |flag|

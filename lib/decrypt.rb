@@ -92,6 +92,7 @@ def decrypt_ciphertext(cipher_text, password, salt, iv, auth_tag)
                                             HASH)
   decipher.iv = iv
   decipher.auth_tag = auth_tag
+  decipher.auth_data = ''
   decipher.padding = 0
 
   begin
@@ -99,6 +100,24 @@ def decrypt_ciphertext(cipher_text, password, salt, iv, auth_tag)
   rescue OpenSSL::Cipher::CipherError
     terminate 'Failed to derive cipher key. Wrong password?'
   end
+end
+
+def encrypt_ciphertext(plain_text, password, salt, iv)
+  encipher = OpenSSL::Cipher.new ENCRYPTION_CIPHER
+  encipher.encrypt
+  encipher.key = OpenSSL::PKCS5.pbkdf2_hmac(password, salt, ITERATIONS, KEY_LENGTH / 8,
+                                            HASH)
+  encipher.iv = iv
+  encipher.auth_data = ''
+  encipher.padding = 0
+
+  begin
+    encrypted = encipher.update(plain_text) + encipher.final
+    auth_tag = encipher.auth_tag
+  rescue OpenSSL::Cipher::CipherError
+    terminate 'Failed to encrypt plaintext. Wrong parameters?'
+  end
+  Base64.strict_encode64(encrypted + auth_tag)
 end
 
 #
@@ -137,6 +156,15 @@ def decrypt_vault(filename)
   plain_text = decrypt_ciphertext(cipher_text, password, salt, iv, auth_tag)
   parse_json(plain_text) # Ensure plain_text is valid JSON.
   plain_text
+end
+
+def encrypt_vault(plain_text, password, salt, iv)
+  cipher_text_with_auth_tag = encrypt_ciphertext(plain_text, password, Base64.strict_decode64(salt),
+                                                 Base64.strict_decode64(iv))
+  '{"services":[],"groups":[],"updatedAt":1708958781890,"schemaVersion":4,"appVersionCode":5000017,' \
+    '"appVersionName":"5.3.5","appOrigin":"android","servicesEncrypted":' \
+    "\"#{cipher_text_with_auth_tag}:#{salt}:#{iv}\"," \
+    '"reference":"lPyg4X0eUVHys/yulzNkR2lVONpCe5KK883sl+ir6B6bYbu2+69nN0bUDI9B9X53DKs3/54JqYRhYrI0a6It9SWR9NHJc1jsAXg0G8tqVOcQdcf4rdhYIg5VJh77h5wSTqt70aH6kfo9IhiTEfRFSDScny0qH1YxzqlDQm3Uw1jHdwW6UFFAA+3/uSTmcD4aoeknWbXP8GwH4z/ORM9VmonyX85LY4tszMjeTeb2U/hjxVaMluJYCn8VFzGsZqec3ayt8E7cHTusGy0tr+gGtM7Fm/iBYUwAUCaOS9XZQhyB3tJq2gNp5ajsS6zEJsKhWXyNU/f0ircshOUGRLm1eCSAiexGT/3/avGkoZMExqY=:xsCM/GAwNcyqrDcYodp58e6xxXl+cj0P+1Bh9mH4f7+UYKrQV4cpMAbQRPyNJz5CbsvSsFGYr+Ls1N+GyX6fp8LahIyovloySTRqQZzBI0VgKTKy1g7PlSSVjhedokyK5osUg6lUTimr29SGyvL4r/ornfkKygDZry8gHjyANX06mfxBK46+qomjsw5TErS0VlitPMJ1OWoh5/ZArEZBSczTGSOLjdQ3uMkQGOEUCJAd9wruBViN7td/0tmBAhzkG7EtrOJN7YNCGSLCiRoeLqS+unbaIOmUeKyn2AWd+jT/k4WcxIkHlYPRumy1DzS/REh6NUfagoO/1fPLMUYUug==:Jz6KfVsBSV9u04o2"}'
 end
 
 #
