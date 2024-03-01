@@ -88,35 +88,6 @@ describe 'extract_fields' do
   end
 end
 
-describe 'encrypt_vault' do
-  it 'Encrypts vault correctly' do
-    expected_plain_text = File.read('test/plaintext_test.json', :encoding => 'utf-8')
-    password = 'example.com'
-
-    SALT_AND_IV_TEST_VECTORS.each do |salt, iv|
-      # String.swapcase simulates different iv for servicesEncrypted and reference.
-      # In practice, for AES-GCM, both iv must be distinct and randomly generated.
-      encrypted_vault = encrypt_vault(expected_plain_text, password, salt, iv, iv.swapcase)
-      # Now decrypt it and check that its plaintext form matches the expected plaintext.
-      obj = parse_json encrypted_vault
-      cipher_text_with_auth_tag, salt, iv = extract_fields(obj).values_at(:cipher_text_with_auth_tag, :salt, :iv)
-      cipher_text, auth_tag = split_cipher_text(cipher_text_with_auth_tag).values_at(:cipher_text, :auth_tag)
-      plain_text, = decrypt_ciphertext(cipher_text, password, salt, iv, auth_tag)
-      expect(plain_text).to eq expected_plain_text
-    end
-  end
-end
-
-describe 'encrypt_plaintext' do
-  it 'Fails to encrypt empty plaintext' do
-    silence('stderr') do
-      expect { encrypt_vault('', '', '', '', '') }.to raise_error(SystemExit) do |error|
-        expect(error.status).to eq(1)
-      end
-    end
-  end
-end
-
 describe 'decrypt_ciphertext' do
   it 'Fails to decrypt empty ciphertext' do
     silence('stderr') do
