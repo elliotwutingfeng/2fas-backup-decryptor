@@ -16,6 +16,11 @@
 
 require 'openssl'
 
+ITERATIONS = 10_000
+KEY_LENGTH = 256
+HASH = 'sha256'.freeze
+ENCRYPTION_CIPHER = 'aes-256-gcm'.freeze
+
 #
 # Derive a key from the given password and salt using PBKDF2-HMAC.
 #

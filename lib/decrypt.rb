@@ -21,12 +21,8 @@ require 'optparse'
 require_relative 'crypto'
 require_relative 'pretty'
 
-ITERATIONS = 10_000
-KEY_LENGTH = 256
 AUTH_TAG_LENGTH = 16
 SERVICES_ENCRYPTED_FIELD_LENGTH = 3
-HASH = 'sha256'.freeze
-ENCRYPTION_CIPHER = 'aes-256-gcm'.freeze
 
 # https://github.com/twofas/2fas-android/blob/main/data/services/src/main/java/com/twofasapp/data/services/domain/BackupContent.kt
 REFERENCE = 'tRViSsLKzd86Hprh4ceC2OP7xazn4rrt4xhfEUbOjxLX8Rc3mkISXE0lWbmnWfggogbBJhtYgpK6fMl1D6m' \
