@@ -19,24 +19,6 @@ require 'spec_helper'
 
 ENCRYPTED_TEST_VAULT = 'test/encrypted_test.2fas'.freeze
 
-# salt and iv are randomly generated via `Base64.strict_encode64 OpenSSL::Random.random_bytes(LENGTH)` where
-# `LENGTH` is 256 for salt and 12 for iv.
-SALT_AND_IV_TEST_VECTORS = [
-  [
-    'ZV0cVL+4EPjkJ8X4sEoja38u9BbAf8PX5rNCrBHrJgaUlSvmS7xKtgbhD8bmZNf5vhQyVVXIge/oAC/PKosEBrtfZ8HAYeSsqV' \
-    'wg9tEr5V+NG1EV+o7F0y94agQvyTBjLRP/8nYJwnoNuEO3oK9AqAqmfSBjCgSZNzFPsjp9wh896GsMr/VOl3proD9btsc4H' \
-    'HG/0RB0KMtTaWYd3lMfHUPzHDDwvlXOiEJNJNhEzCk6qa5ISI+6hNbgsPhlWowHvBV8+WJKa2w4jceAKXP8w/ftESHZRabw' \
-    'iMrGJsXoZ0FobI2Xq0gfcEy06LUrf08b6b8Tt0JEtkc+RZ0ncyUMaA==', '6/dS+1PWwlE8Jwuy'
-  ], ['GlnfpJEabZKxXQsI/DKzPK90dQwRl9z1jZuGTjKhPBBF+SpWaQiHhT2b6Tu4l/I06+f1pRL8WsUqCXOar0MQo3MgG0kl' \
-      'ybPP8HL8h2Pj6wCqDSwTxQIU2pIxDtLC30rIdfbDBAn63pzDhPY1R//zRy5LbL3dpY/5AERYUF1A1Osxc7TnWDExjUBbK/kvN' \
-      '6vZwlVcwpHcnzgX0ota7yC1yY0mZ4ek7gn/WaLwWZoyFK4qYZlVON4Zo8olpH3J/D8uRyN0/raqCvCgunPxtr7MwzJJ1uyoz7' \
-      'PbqqLq7Jh3gjtjt80j1gVUM0QAUQwLeQlJABg9rHXjatoZZClfLi/lCg==', 'c9Rrz0ywTPZ3sBUi'],
-  ['Jljh8tr1hrFYla54digxTTJyrx0ISp4z/jjgptBqiHB/WQkqgqpraAe9WS0pir8jXRYYctocMyrYOqPlaoRyeMkd027Pt18Ob' \
-   'SxCM7M3jV87WTBDuiqmwjm9oLvZCflALQUmQjOWVdLz5rg6Qa2d1alSP5zRiOIrtgADdbfa1VGzScNRPhxl1XuRlm5NVyk2wvbMy' \
-   'cwxUTQP3YLrzI2afXk9evZCJSbpsap6Kjv9iI2ztuMF7jIloQC/SUs/0qJGXbHToLgTklr3GoQgSpCECUbjeH1e3m+Z8TNedv2qv' \
-   'QDxrkiP6FPJYvOaOFVM6PGbrUMflif8gR2oMdxzQ2xZVg==', 'tUNqsK9OSBXrbLCS']
-].freeze
-
 # See https://michaelay.github.io/blog/2014/12/15/suppress-stdout-and-stderr-when-running-rspec
 def silence(filter = '')
   @original_stderr = $stderr
