@@ -86,7 +86,7 @@ end
 # Encrypt `plain_text` and return its ciphertext and authentication tag.
 #
 # @param [String] plain_text bytes to be encrypted
-# @param [String] password Backup file password as plaintext
+# @param [String] password HMAC password as plaintext
 # @param [String] salt HMAC salt as bytes
 # @param [String] iv AES-GCM initialization vector as bytes
 #
