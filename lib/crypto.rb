@@ -24,7 +24,7 @@ ENCRYPTION_CIPHER = 'aes-256-gcm'.freeze
 #
 # Derive a key from the given password and salt using PBKDF2-HMAC.
 #
-# @param [String] password Backup file password as plaintext
+# @param [String] password HMAC password as plaintext
 # @param [String] salt HMAC salt as bytes
 #
 # @return [String] Derived key
@@ -66,7 +66,7 @@ end
 # Decrypt `cipher_text` and return its plaintext and authentication tag.
 #
 # @param [String] cipher_text bytes to be decrypted
-# @param [String] password Backup file password as plaintext
+# @param [String] password HMAC password as plaintext
 # @param [String] salt HMAC salt as bytes
 # @param [String] iv AES-GCM initialization vector as bytes
 # @param [String] auth_tag AES-GCM authentication tag as bytes
