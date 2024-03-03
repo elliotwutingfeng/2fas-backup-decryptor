@@ -76,12 +76,12 @@ ruby lib/decrypt.rb test/encrypted_test.2fas -f pretty -e icon.iconCollection.id
 ```
 
 ```csv
-otp.algorithm  otp.counter  otp.digits  otp.issuer  otp.label  otp.period  otp.tokenType  secret
-SHA1                        6           Deno        Mason      30          TOTP           4SJHB4GSD43FZBAI7C2HLRJGPQ
-SHA256                      7           SPDX        James      30          TOTP           5OM4WOOGPLQEF6UGN3CPEOOLWU
-SHA512                      8           Airbnb      Elijah     60          TOTP           7ELGJSGXNCCTV3O6LKJWYFV2RA
-SHA1                        5           Boeing      Sophia     10          STEAM          JRZCL47CMXVOQMNPZR2F7J4RGI
-SHA256         10           8           Air Canada  Benjamin               HOTP           KUVJJOM753IHTNDSZVCNKL7GII
+otp.algorithm  otp.digits  otp.issuer  otp.label  otp.period  otp.tokenType  secret
+SHA1           6           Deno        Mason      30          TOTP           4SJHB4GSD43FZBAI7C2HLRJGPQ
+SHA256         7           SPDX        James      30          TOTP           5OM4WOOGPLQEF6UGN3CPEOOLWU
+SHA512         8           Airbnb      Elijah     60          TOTP           7ELGJSGXNCCTV3O6LKJWYFV2RA
+SHA1           5           Boeing      Sophia     10          STEAM          JRZCL47CMXVOQMNPZR2F7J4RGI
+SHA256         8           Air Canada  Benjamin               HOTP           KUVJJOM753IHTNDSZVCNKL7GII
 ```
 
 ## Testing
