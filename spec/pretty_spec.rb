@@ -15,8 +15,9 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 require 'csv'
-require 'spec_helper'
+require 'json'
 require 'pretty'
+require 'spec_helper'
 
 describe 'parse_json' do
   it 'Parses valid JSON' do

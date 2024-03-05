@@ -14,8 +14,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-require 'spec_helper'
 require 'decrypt'
+require 'spec_helper'
 
 ENCRYPTED_TEST_VAULT = 'test/encrypted_test.2fas'.freeze
 
@@ -65,6 +65,16 @@ describe 'extract_fields' do
         expect { extract_fields(obj) }.to raise_error(SystemExit) do |error|
           expect(error.status).to eq(1)
         end
+      end
+    end
+  end
+end
+
+describe 'decrypt_ciphertext' do
+  it 'Fails to decrypt empty ciphertext' do
+    silence('stderr') do
+      expect { decrypt_ciphertext('', '', '', '', '') }.to raise_error(SystemExit) do |error|
+        expect(error.status).to eq(1)
       end
     end
   end

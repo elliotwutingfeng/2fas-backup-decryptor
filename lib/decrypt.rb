@@ -16,17 +16,18 @@
 
 require 'base64'
 require 'io/console'
-require 'openssl'
 require 'optparse'
 
+require_relative 'crypto'
 require_relative 'pretty'
 
-ITERATIONS = 10_000
-KEY_LENGTH = 256
 AUTH_TAG_LENGTH = 16
 SERVICES_ENCRYPTED_FIELD_LENGTH = 3
-HASH = 'sha256'.freeze
-ENCRYPTION_CIPHER = 'aes-256-gcm'.freeze
+
+# https://github.com/twofas/2fas-android/blob/main/data/services/src/main/java/com/twofasapp/data/services/domain/BackupContent.kt
+REFERENCE = 'tRViSsLKzd86Hprh4ceC2OP7xazn4rrt4xhfEUbOjxLX8Rc3mkISXE0lWbmnWfggogbBJhtYgpK6fMl1D6m' \
+            'tsy92R3HkdGfwuXbzLebqVFJsR7IZ2w58t938iymwG4824igYy1wi6n2WDpO1Q1P69zwJGs2F5a1qP4MyIiDSD7NCV2OvidX' \
+            'QCBnDlGfmz0f1BQySRkkt4ryiJeCjD2o4QsveJ9uDBUn8ELyOrESv5R5DMDkD4iAF8TXU7KyoJujd'.freeze
 
 def terminate(message)
   warn message
@@ -41,7 +42,7 @@ end
 
 #
 # Extract the `cipher_text_with_auth_tag`, `salt`, and `iv` bytes fields
-# located at the `:servicesEncrypted` key of JSON Hash `obj`
+# located at the `:servicesEncrypted` key of JSON Hash `obj`.
 #
 # @param [Hash] obj JSON Hash
 #
@@ -58,7 +59,7 @@ def extract_fields(obj)
 end
 
 #
-# Separate cipher text from 16-byte AES-GCM authentication tag
+# Separate cipher text from 16-byte AES-GCM authentication tag.
 # Reference: https://crypto.stackexchange.com/a/63539
 #
 # @param [String] cipher_text_with_auth_tag Cipher text with AES-GCM authentication tag as bytes
@@ -72,33 +73,6 @@ def split_cipher_text(cipher_text_with_auth_tag)
 
   { :cipher_text => cipher_text_with_auth_tag[0...-AUTH_TAG_LENGTH],
     :auth_tag => cipher_text_with_auth_tag[-AUTH_TAG_LENGTH..-1] }
-end
-
-#
-# Decrypt `cipher_text` and return the plaintext result as String
-#
-# @param [String] cipher_text Encrypted text as bytes to be decrypted
-# @param [String] password Backup file password as plaintext
-# @param [String] salt HMAC salt as bytes
-# @param [String] iv AES-GCM initialization vector as bytes
-# @param [String] auth_tag AES-GCM authentication tag as bytes
-#
-# @return [String] Decrypted `cipher_text`
-#
-def decrypt_ciphertext(cipher_text, password, salt, iv, auth_tag)
-  decipher = OpenSSL::Cipher.new ENCRYPTION_CIPHER
-  decipher.decrypt
-  decipher.key = OpenSSL::PKCS5.pbkdf2_hmac(password, salt, ITERATIONS, KEY_LENGTH / 8,
-                                            HASH)
-  decipher.iv = iv
-  decipher.auth_tag = auth_tag
-  decipher.padding = 0
-
-  begin
-    decipher.update(cipher_text) + decipher.final
-  rescue OpenSSL::Cipher::CipherError
-    terminate 'Failed to derive cipher key. Wrong password?'
-  end
 end
 
 #
@@ -117,14 +91,13 @@ def getpass(prompt)
 end
 
 #
-# Decrypt vault with password from user input.
-# If successful, return plaintext vault data as JSON String.
+# Parse vault parameters from vault at `filename`.
 #
-# @param [String] filename Vault file to decrypt
+# @param [String] filename Vault filename
 #
-# @return [String] Plaintext vault as JSON String
+# @return [Hash] Vault parameters
 #
-def decrypt_vault(filename)
+def parse_vault_params(filename)
   begin
     obj = parse_json File.read(filename, :encoding => 'utf-8')
   rescue Errno::ENOENT => e
@@ -132,21 +105,10 @@ def decrypt_vault(filename)
   end
   cipher_text_with_auth_tag, salt, iv = extract_fields(obj).values_at(:cipher_text_with_auth_tag, :salt, :iv)
   cipher_text, auth_tag = split_cipher_text(cipher_text_with_auth_tag).values_at(:cipher_text, :auth_tag)
-
-  password = getpass('Enter 2FAS encrypted backup password: ')
-  plain_text = decrypt_ciphertext(cipher_text, password, salt, iv, auth_tag)
-  parse_json(plain_text) # Ensure plain_text is valid JSON.
-  plain_text
+  { :cipher_text => cipher_text, :salt => salt, :iv => iv, :auth_tag => auth_tag }
 end
 
-#
-# Accept vault filename as a command-line argument, and optionally output format.
-# Decrypt the vault and write its contents to $stdout in specified output format.
-#
-# @param [String] filename Vault file to decrypt
-# @param [String] format Output format (Default: json)
-#
-def main
+def parse_args
   formats = %i[json csv pretty]
   options = { :format => :json, :except => [] }
 
@@ -177,8 +139,25 @@ def main
   rescue StandardError => e
     terminate "#{e}\n#{parser}"
   end
+  options
+end
 
-  plain_text = decrypt_vault(ARGV[0])
+#
+# Accept vault filename as a command-line argument, and optionally output format and fields to exclude.
+# Decrypt the vault and write its contents to $stdout in specified output format.
+#
+# @param [String] filename Vault file to decrypt
+# @param [String] format Output format (Default: json)
+#
+def main
+  options = parse_args
+  vault_params = parse_vault_params ARGV[0]
+  vault_params[:password] = getpass('Enter 2FAS encrypted backup password: ')
+
+  plain_text, = decrypt_ciphertext(vault_params[:cipher_text], vault_params[:password], vault_params[:salt],
+                                   vault_params[:iv], vault_params[:auth_tag])
+  parse_json(plain_text) # Ensure plain_text is valid JSON.
+
   $stdout.write case options[:format]
                 when :pretty
                   beautify remove_fields(entries_to_csv(plain_text), options[:except])
