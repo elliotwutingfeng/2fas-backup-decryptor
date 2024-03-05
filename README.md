@@ -90,5 +90,5 @@ SHA256         8           Air Canada  Benjamin               HOTP           KUV
 # The test suite requires Ruby 2.4 or newer
 gem install bundler
 bundle install
-bundle exec rspec
+bundle exec rspec -r spec_helper
 ```
