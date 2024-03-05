@@ -28,7 +28,7 @@ jobs:
 
             - name: Run tests
               run: |
-                  bundle _2.3.27_ exec rspec
+                  bundle _2.3.27_ exec rspec -r spec_helper
 
             - name: Upload coverage to Coveralls
               if: matrix.os == 'ubuntu-latest' && matrix.ruby-version == '3.3'
