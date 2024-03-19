@@ -17,6 +17,11 @@
 require 'csv'
 require 'json'
 
+def terminate(message)
+  warn message
+  exit 1
+end
+
 #
 # Parse `plain_text` string as JSON object
 #

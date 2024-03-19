@@ -16,6 +16,10 @@
 
 require 'openssl'
 
+require_relative 'pretty'
+
+terminate 'LibreSSL is not supported.' if OpenSSL::OPENSSL_LIBRARY_VERSION.downcase.include? 'libressl'
+
 ITERATIONS = 10_000
 KEY_LENGTH = 256
 HASH = 'sha256'.freeze

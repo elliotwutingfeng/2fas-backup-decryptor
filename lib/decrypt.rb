@@ -29,11 +29,6 @@ REFERENCE = 'tRViSsLKzd86Hprh4ceC2OP7xazn4rrt4xhfEUbOjxLX8Rc3mkISXE0lWbmnWfggogb
             'tsy92R3HkdGfwuXbzLebqVFJsR7IZ2w58t938iymwG4824igYy1wi6n2WDpO1Q1P69zwJGs2F5a1qP4MyIiDSD7NCV2OvidX' \
             'QCBnDlGfmz0f1BQySRkkt4ryiJeCjD2o4QsveJ9uDBUn8ELyOrESv5R5DMDkD4iAF8TXU7KyoJujd'.freeze
 
-def terminate(message)
-  warn message
-  exit 1
-end
-
 def assert_is_hash(obj)
   return if obj.is_a? Hash
 

@@ -15,7 +15,7 @@ This application is neither affiliated with Two Factor Authentication Service, I
   - In the terminal, run the following to view your Ruby interpreter's [OpenSSL](https://openssl.org) version
 
     ```bash
-    ruby -e "require 'openssl'; puts OpenSSL::OPENSSL_VERSION"
+    ruby -e "require 'openssl'; puts OpenSSL::OPENSSL_LIBRARY_VERSION"
     # Example output
     # OpenSSL 3.1.1 30 May 2023
     ```
