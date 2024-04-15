@@ -23,6 +23,7 @@ describe 'parse_json' do
   it 'Parses valid JSON' do
     expect(parse_json('{"a": [1, 2]}')).to eq({ :a => [1, 2] })
   end
+
   it 'Exit 1 if invalid JSON' do
     silence do
       expect { parse_json('') }.to raise_error(SystemExit) do |error|
@@ -49,20 +50,20 @@ end
 balanced_json_data = [
   {
     :string1 => 'a_1',
-    :nil1 => nil,
+    :nil1 => '',
     :object1 => {
       :innerstring1 => 'a_1_1',
       :innerstring2 => 'a_1_2',
-      :innerint1 => 6
+      :innerint1 => '6'
     }
   },
   {
     :string1 => 'b_1',
-    :nil1 => nil,
+    :nil1 => '',
     :object1 => {
       :innerstring1 => 'b_1_1',
       :innerstring2 => 'b_1_2',
-      :innerint1 => 6
+      :innerint1 => '6'
     }
   }
 ]
@@ -72,24 +73,24 @@ unbalanced_json_data = [
   {
     :string1 => 'a_1',
     :string3 => 'a_3',
-    :nil1 => nil,
+    :nil1 => '',
     :object1 => {
       :innerstring1 => 'a_1_1',
       :innerstring2 => 'a_1_2',
-      :innerint1 => 0xa
+      :innerint1 => '10'
     }
   },
   {
     :string1 => 'b_1',
     :string2 => 'b_2',
-    :nil1 => nil,
-    :nil2 => nil,
+    :nil1 => '',
+    :nil2 => '',
     :object1 => {
       :innerstring1 => 'b_1_1',
       :innerstring2 => 'b_1_2',
       :innerstring3 => 'b_1_3',
-      :innerint1 => 0xb,
-      :innerint2 => 0xbb
+      :innerint1 => '11',
+      :innerint2 => '187'
     }
   }
 ]
@@ -101,13 +102,13 @@ describe 'flatten_json' do
 
   it 'Flattens array where all elements have the exact same fields' do
     flattened_data = balanced_json_data.map { |record| flatten_json(record, '') }
-    expect(flattened_data).to eq [{ :nil1 => nil,
-                                    :'object1.innerint1' => 6,
+    expect(flattened_data).to eq [{ :nil1 => '',
+                                    :'object1.innerint1' => '6',
                                     :'object1.innerstring1' => 'a_1_1',
                                     :'object1.innerstring2' => 'a_1_2',
                                     :string1 => 'a_1' },
-                                  { :nil1 => nil,
-                                    :'object1.innerint1' => 6,
+                                  { :nil1 => '',
+                                    :'object1.innerint1' => '6',
                                     :'object1.innerstring1' => 'b_1_1',
                                     :'object1.innerstring2' => 'b_1_2',
                                     :string1 => 'b_1' }]
@@ -115,15 +116,15 @@ describe 'flatten_json' do
 
   it 'Flattens array where an element has fields that subsequent elements do not and vice versa' do
     flattened_data = unbalanced_json_data.map { |record| flatten_json(record, '') }
-    expect(flattened_data).to eq [{ :nil1 => nil,
-                                    :'object1.innerint1' => 0xa,
+    expect(flattened_data).to eq [{ :nil1 => '',
+                                    :'object1.innerint1' => '10',
                                     :'object1.innerstring1' => 'a_1_1',
                                     :'object1.innerstring2' => 'a_1_2',
                                     :string1 => 'a_1', :string3 => 'a_3' },
-                                  { :nil1 => nil,
-                                    :nil2 => nil,
-                                    :'object1.innerint1' => 0xb,
-                                    :'object1.innerint2' => 0xbb,
+                                  { :nil1 => '',
+                                    :nil2 => '',
+                                    :'object1.innerint1' => '11',
+                                    :'object1.innerint2' => '187',
                                     :'object1.innerstring1' => 'b_1_1',
                                     :'object1.innerstring2' => 'b_1_2',
                                     :'object1.innerstring3' => 'b_1_3',

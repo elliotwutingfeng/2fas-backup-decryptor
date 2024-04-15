@@ -50,7 +50,7 @@ def flatten_json(json_data, parent_key)
     if value.is_a?(Hash)
       hash.merge!(flatten_json(value, new_key))
     else
-      hash[new_key] = value.is_a?(Array) ? value.to_json : value # Do not unpack arrays.
+      hash[new_key] = value.is_a?(Array) ? value.to_json : value.to_s # Do not unpack arrays.
     end
   end
 end
@@ -70,7 +70,10 @@ def entries_to_csv(plain_text)
   CSV.generate do |csv|
     csv << headers
     flattened_data.each do |record|
-      csv << headers.map { |header| record[header] }
+      csv << headers.map do |header|
+        # Some records may not contain the field [header].
+        record[header].nil? || record[header].empty? ? nil : record[header].inspect[1..-2] # Remove double-quotes.
+      end
     end
   end
 end
