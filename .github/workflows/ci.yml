@@ -62,6 +62,7 @@ jobs:
             - name: Install rubocop
               run: |
                   gem install rubocop
+                  gem install rubocop-rspec
 
             - name: Format Ruby with rubocop
               run: |
