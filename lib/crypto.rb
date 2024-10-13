@@ -16,10 +16,8 @@
 
 require 'openssl'
 
-require_relative 'pretty'
-
-terminate 'LibreSSL is not supported by this program.' if OpenSSL::OPENSSL_LIBRARY_VERSION.downcase.include? 'libressl'
-terminate 'PBKDF2 support is missing.' if defined?(OpenSSL::PKCS5).nil? || !OpenSSL::PKCS5.methods.include?(:pbkdf2_hmac)
+abort 'LibreSSL is not supported by this program.' if OpenSSL::OPENSSL_LIBRARY_VERSION.downcase.include? 'libressl'
+abort 'PBKDF2 support is missing.' if defined?(OpenSSL::PKCS5).nil? || !OpenSSL::PKCS5.methods.include?(:pbkdf2_hmac)
 
 ITERATIONS = 10_000
 KEY_LENGTH = 256
@@ -80,7 +78,7 @@ def decrypt_ciphertext(cipher_text, password, salt, iv, auth_tag)
   master_key = derive_key(password, salt)
   aes_gcm(cipher_text, master_key, iv, encrypt, auth_tag)
 rescue OpenSSL::Cipher::CipherError, ArgumentError => e
-  terminate "Failed to derive cipher key. #{e.instance_of?(ArgumentError) ? e.message : 'Wrong password?'}"
+  abort "Failed to derive cipher key. #{e.instance_of?(ArgumentError) ? e.message : 'Wrong password?'}"
 end
 
 #
@@ -99,5 +97,5 @@ def encrypt_plaintext(plain_text, password, salt, iv)
   master_key = derive_key(password, salt)
   aes_gcm(plain_text, master_key, iv, encrypt)
 rescue OpenSSL::Cipher::CipherError, ArgumentError => e
-  terminate "Failed to encrypt plaintext. #{e.instance_of?(ArgumentError) ? e.message : 'Invalid parameters?'}"
+  abort "Failed to encrypt plaintext. #{e.instance_of?(ArgumentError) ? e.message : 'Invalid parameters?'}"
 end

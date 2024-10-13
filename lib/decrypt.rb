@@ -32,7 +32,7 @@ REFERENCE = 'tRViSsLKzd86Hprh4ceC2OP7xazn4rrt4xhfEUbOjxLX8Rc3mkISXE0lWbmnWfggogb
 def assert_is_hash(obj)
   return if obj.is_a? Hash
 
-  terminate 'Invalid vault file. Top-level is not Hash.'
+  abort 'Invalid vault file. Top-level is not Hash.'
 end
 
 #
@@ -47,7 +47,7 @@ def extract_fields(obj)
   assert_is_hash(obj)
   fields = obj.fetch(:servicesEncrypted, '').split(':', SERVICES_ENCRYPTED_FIELD_LENGTH + 1)
   if fields.length != SERVICES_ENCRYPTED_FIELD_LENGTH
-    terminate format('Invalid vault file. Number of fields is not %d.', SERVICES_ENCRYPTED_FIELD_LENGTH)
+    abort format('Invalid vault file. Number of fields is not %d.', SERVICES_ENCRYPTED_FIELD_LENGTH)
   end
   cipher_text_with_auth_tag, salt, iv = fields.map { |field| Base64.strict_decode64 field }
   { :cipher_text_with_auth_tag => cipher_text_with_auth_tag, :salt => salt, :iv => iv }
@@ -63,7 +63,7 @@ end
 #
 def split_cipher_text(cipher_text_with_auth_tag)
   if cipher_text_with_auth_tag.length <= AUTH_TAG_LENGTH
-    terminate format('Invalid vault file. Length of cipher text with auth tag must be more than %d', AUTH_TAG_LENGTH)
+    abort format('Invalid vault file. Length of cipher text with auth tag must be more than %d', AUTH_TAG_LENGTH)
   end
 
   { :cipher_text => cipher_text_with_auth_tag[0...-AUTH_TAG_LENGTH],
@@ -96,7 +96,7 @@ def parse_vault_params(filename)
   begin
     obj = parse_json File.read(filename, :encoding => 'utf-8')
   rescue Errno::ENOENT => e
-    terminate e.to_s
+    abort e.to_s
   end
   cipher_text_with_auth_tag, salt, iv = extract_fields(obj).values_at(:cipher_text_with_auth_tag, :salt, :iv)
   cipher_text, auth_tag = split_cipher_text(cipher_text_with_auth_tag).values_at(:cipher_text, :auth_tag)
@@ -132,7 +132,7 @@ def parse_args
             'hiding fields is only supported for `csv` and `pretty` formats'
     end
   rescue StandardError => e
-    terminate "#{e}\n#{parser}"
+    abort "#{e}\n#{parser}"
   end
   options
 end
