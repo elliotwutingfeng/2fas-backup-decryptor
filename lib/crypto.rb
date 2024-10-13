@@ -18,7 +18,8 @@ require 'openssl'
 
 require_relative 'pretty'
 
-terminate 'LibreSSL is not supported.' if OpenSSL::OPENSSL_LIBRARY_VERSION.downcase.include? 'libressl'
+terminate 'LibreSSL is not supported by this program.' if OpenSSL::OPENSSL_LIBRARY_VERSION.downcase.include? 'libressl'
+terminate 'PBKDF2 support is missing.' if defined?(OpenSSL::PKCS5).nil? || !OpenSSL::PKCS5.methods.include?(:pbkdf2_hmac)
 
 ITERATIONS = 10_000
 KEY_LENGTH = 256
@@ -52,11 +53,7 @@ end
 #
 def aes_gcm(text, master_key, iv, encrypt, auth_tag = nil)
   cipher = OpenSSL::Cipher.new ENCRYPTION_CIPHER
-  if encrypt
-    cipher.encrypt
-  else
-    cipher.decrypt
-  end
+  encrypt ? cipher.encrypt : cipher.decrypt
   cipher.key = master_key
   cipher.iv = iv
   cipher.auth_tag = auth_tag unless encrypt

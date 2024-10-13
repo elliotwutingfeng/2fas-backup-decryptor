@@ -4,6 +4,8 @@ require:
 AllCops:
     NewCops: enable
     TargetRubyVersion: 2.0
+Layout/LineLength:
+    Max: 121
 Metrics/AbcSize:
     Max: 24
 Metrics/BlockLength:
