@@ -17,7 +17,7 @@
 require 'openssl'
 
 abort 'LibreSSL is not supported by this program.' if OpenSSL::OPENSSL_LIBRARY_VERSION.downcase.include? 'libressl'
-abort 'PBKDF2 support is missing.' if defined?(OpenSSL::PKCS5).nil? || !OpenSSL::PKCS5.methods.include?(:pbkdf2_hmac)
+abort 'PBKDF2 support is missing.' if defined?(OpenSSL::PKCS5).nil? || !OpenSSL::PKCS5.respond_to?(:pbkdf2_hmac)
 
 ITERATIONS = 10_000
 KEY_LENGTH = 256

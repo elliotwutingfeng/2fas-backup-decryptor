@@ -17,7 +17,7 @@ This application is neither affiliated with Two Factor Authentication Service, I
     ```bash
     ruby -e "require 'openssl'; puts OpenSSL::OPENSSL_LIBRARY_VERSION"
     # Example output
-    # OpenSSL 3.1.1 30 May 2023
+    # OpenSSL 3.3.2 3 Sep 2024
     ```
 
   - [LibreSSL](https://libressl.org) is not supported
