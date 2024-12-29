@@ -10,7 +10,7 @@ This application is neither affiliated with Two Factor Authentication Service, I
 
 ## Requirements
 
-- **Ruby:** 2.4+/3.0+, no external gems needed
+- **Ruby:** 2.5+/3.0+, no external gems needed
 - **OpenSSL:** 1.0.2+/3.0+
   - In the terminal, run the following to view your Ruby interpreter's [OpenSSL](https://openssl.org) version
 
@@ -109,8 +109,15 @@ SHA256         10           8           Air Canada  Benjamin               HOTP 
 ## Testing
 
 ```bash
-# The test suite requires Ruby 2.4 or newer
 gem install bundler
 bundle install
 bundle exec rspec -r spec_helper
 ```
+
+## Vendoring Bundled Gems
+
+```bash
+gem unpack csv --target=vendor/gems/
+```
+
+Then update gem versions in Gemfile, and run `bundle install`.
