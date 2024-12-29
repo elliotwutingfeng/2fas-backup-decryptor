@@ -14,7 +14,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-require 'base64'
 require 'io/console'
 require 'optparse'
 
@@ -49,7 +48,7 @@ def extract_fields(obj)
   if fields.length != SERVICES_ENCRYPTED_FIELD_LENGTH
     abort format('Invalid vault file. Number of fields is not %d.', SERVICES_ENCRYPTED_FIELD_LENGTH)
   end
-  cipher_text_with_auth_tag, salt, iv = fields.map { |field| Base64.strict_decode64 field }
+  cipher_text_with_auth_tag, salt, iv = fields.map { |field| field.unpack1('m0') }
   { :cipher_text_with_auth_tag => cipher_text_with_auth_tag, :salt => salt, :iv => iv }
 end
 

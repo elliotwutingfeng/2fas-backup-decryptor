@@ -18,7 +18,7 @@ require 'create_test_vault'
 require 'crypto'
 require 'spec_helper'
 
-# salt and iv are randomly generated via `Base64.strict_encode64 OpenSSL::Random.random_bytes(LENGTH)` where
+# salt and iv are randomly generated via `[OpenSSL::Random.random_bytes(LENGTH)].pack('m0')` where
 # `LENGTH` is 256 for salt and 12 for iv.
 SALT_AND_IV_TEST_VECTORS = [
   [
@@ -44,8 +44,8 @@ describe 'encrypt_vault' do
     SALT_AND_IV_TEST_VECTORS.each do |salt, iv|
       # String.swapcase simulates different iv for servicesEncrypted and reference.
       # In practice, for AES-GCM, both iv must be distinct and randomly generated.
-      encrypted_vault = encrypt_vault(expected_plain_text, password, Base64.strict_decode64(salt),
-                                      Base64.strict_decode64(iv), Base64.strict_decode64(iv.swapcase))
+      encrypted_vault = encrypt_vault(expected_plain_text, password, salt.unpack1('m0'),
+                                      iv.unpack1('m0'), iv.swapcase.unpack1('m0'))
       # Now decrypt it and check that its plaintext form matches the expected plaintext.
       obj = parse_json encrypted_vault
       cipher_text_with_auth_tag, salt, iv = extract_fields(obj).values_at(:cipher_text_with_auth_tag, :salt, :iv)

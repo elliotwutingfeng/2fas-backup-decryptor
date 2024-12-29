@@ -14,7 +14,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-require 'csv'
+require_relative '../vendor/gems/csv-3.3.2/lib/csv'
 require 'json'
 require 'pretty'
 require 'spec_helper'

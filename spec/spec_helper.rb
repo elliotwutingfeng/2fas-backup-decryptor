@@ -18,7 +18,12 @@ require 'simplecov'
 require 'simplecov-cobertura'
 SimpleCov.formatter = SimpleCov::Formatter::MultiFormatter.new([SimpleCov::Formatter::HTMLFormatter,
                                                                 SimpleCov::Formatter::CoberturaFormatter])
-SimpleCov.start
+
+SimpleCov.profiles.define 'no_vendor_coverage' do
+  add_filter 'vendor'
+end
+
+SimpleCov.start 'no_vendor_coverage'
 
 RSpec.configure do |rspec|
   rspec.expect_with :rspec do |c|

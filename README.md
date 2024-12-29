@@ -10,14 +10,14 @@ This application is neither affiliated with Two Factor Authentication Service, I
 
 ## Requirements
 
-- **Ruby:** 2.0+/3.0+, no external gems needed
+- **Ruby:** 2.4+/3.0+, no external gems needed
 - **OpenSSL:** 1.0.2+/3.0+
   - In the terminal, run the following to view your Ruby interpreter's [OpenSSL](https://openssl.org) version
 
     ```bash
     ruby -e "require 'openssl'; puts OpenSSL::OPENSSL_LIBRARY_VERSION"
     # Example output
-    # OpenSSL 3.3.2 3 Sep 2024
+    # OpenSSL 3.4.0 22 Oct 2024
     ```
 
   - [LibreSSL](https://libressl.org) is not supported

@@ -37,7 +37,7 @@ jobs:
                   bundle _2.3.27_ exec rspec -r spec_helper
 
             - name: Upload coverage to Coveralls
-              if: matrix.os == 'ubuntu-latest' && matrix.ruby-version == '3.3'
+              if: matrix.os == 'ubuntu-latest' && matrix.ruby-version == '3.4'
               uses: coverallsapp/github-action@v2
 
     format-markdown:
