@@ -1,6 +1,6 @@
 source 'https://rubygems.org'
 
-gem 'csv', '3.3.4', :path => 'vendor/gems/csv-3.3.3'
+gem 'csv', '3.3.5', :path => 'vendor/gems/csv-3.3.3'
 gem 'rspec', require: false, group: :test
 gem 'rubocop', require: false, group: :test
 gem 'rubocop-rspec', require: false, group: :test
