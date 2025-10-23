@@ -16,11 +16,11 @@ GEM
     parser (3.3.9.0)
       ast (~> 2.4.1)
       racc
-    prism (1.5.2)
+    prism (1.6.0)
     racc (1.8.1)
     rainbow (3.1.1)
     regexp_parser (2.11.3)
-    rexml (3.4.2)
+    rexml (3.4.4)
     rspec (3.13.2)
       rspec-core (~> 3.13.0)
       rspec-expectations (~> 3.13.0)
