@@ -1,10 +1,29 @@
 # News
 
+## 3.3.5 - 2025-06-01
+
+### Improvements
+
+  * docs: Fixed `StringScanner` document URL.
+    * GH-343
+    * Patch by Petrik de Heus
+
+### Thanks
+
+  *  Petrik de Heus
+
+## 3.3.4 - 2025-04-13
+
+### Improvements
+
+  * `csv-filter`: Removed an experimental command line tool.
+    * GH-341
+
 ## 3.3.3 - 2025-03-20
 
 ### Improvements
 
-  * `csv-filter`: Add an experimental command line tool to filter a CSV.
+  * `csv-filter`: Added an experimental command line tool to filter a CSV.
     * Patch by Burdette Lamar
 
 ### Fixes
