@@ -21,7 +21,7 @@ jobs:
 
         steps:
             - name: Checkout
-              uses: actions/checkout@v5
+              uses: actions/checkout@v6
 
             - uses: ruby/setup-ruby@v1
               with:
@@ -46,7 +46,7 @@ jobs:
 
         steps:
             - name: Checkout
-              uses: actions/checkout@v5
+              uses: actions/checkout@v6
 
             - name: Format Markdown with markdownlint
               run: |
@@ -60,7 +60,7 @@ jobs:
 
         steps:
             - name: Checkout
-              uses: actions/checkout@v5
+              uses: actions/checkout@v6
 
             - uses: ruby/setup-ruby@v1
               with:
