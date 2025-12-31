@@ -12,11 +12,7 @@ jobs:
             matrix:
                 os: [macos-latest, windows-latest, ubuntu-latest]
                 ruby-version:
-                    ["2.5", "2.6", "3.4"]
-                exclude:
-                    - { os: macos-latest, ruby-version: "2.5" }
-                include:
-                    - { os: macos-13, ruby-version: "2.5" }
+                    ["2.6", "4.0"]
         runs-on: ${{ matrix.os }}
 
         steps:
@@ -38,7 +34,7 @@ jobs:
                   bundle _2.3.27_ exec rspec -r spec_helper
 
             - name: Upload coverage to Coveralls
-              if: matrix.os == 'ubuntu-latest' && matrix.ruby-version == '3.4'
+              if: matrix.os == 'ubuntu-latest' && matrix.ruby-version == '4.0'
               uses: coverallsapp/github-action@v2
 
     format-markdown:
@@ -64,7 +60,7 @@ jobs:
 
             - uses: ruby/setup-ruby@v1
               with:
-                  ruby-version: 3.4.7
+                  ruby-version: 4
 
             - name: Install rubocop
               run: |
