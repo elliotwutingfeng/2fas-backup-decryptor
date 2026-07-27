@@ -1,7 +1,7 @@
 PATH
   remote: vendor/gems/csv-3.3.5
   specs:
-    csv (3.3.5)
+    csv (3.3.6)
 
 GEM
   remote: https://rubygems.org/
@@ -70,7 +70,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  csv (= 3.3.5)!
+  csv (= 3.3.6)!
   rspec
   rubocop
   rubocop-rspec
